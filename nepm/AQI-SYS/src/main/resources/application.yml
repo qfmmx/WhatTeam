@@ -4,6 +4,8 @@ server:
     context-path: /api
 
 spring:
+  profiles:
+    active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root

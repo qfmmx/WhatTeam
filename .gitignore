@@ -3,3 +3,10 @@ dist/
 .DS_Store
 *.local
 .claude/
+
+# 后端构建产物（Maven）
+target/
+
+# 一键启动脚本的运行时文件（日志 / PID）
+.run/
+*.log

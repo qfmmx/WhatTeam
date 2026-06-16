@@ -6,7 +6,7 @@
 import axios from 'axios';
 import { provide } from 'vue';
 
-axios.defaults.baseURL = 'http://localhost:8080/nepm/';
+axios.defaults.baseURL = 'http://localhost:8085/nepm/';
 provide('axios',axios);
 </script>
 
