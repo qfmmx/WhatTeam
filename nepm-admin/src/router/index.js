@@ -19,14 +19,14 @@ const routes = [
         component: () => import('@/views/Home.vue')
       },
       {
-        path: 'feedback/list',
+        path: 'feedback',
         name: 'FeedbackList',
-        component: () => import('@/views/feedback/FeedbackList.vue')
+        component: () => import('@/pages/FeedbackListView.vue')
       },
       {
-        path: 'feedback/detail/:id',
+        path: 'feedback/:afId',
         name: 'FeedbackDetail',
-        component: () => import('@/views/feedback/FeedbackDetail.vue')
+        component: () => import('@/pages/FeedbackDetailView.vue')
       },
       {
         path: 'aqi/list',

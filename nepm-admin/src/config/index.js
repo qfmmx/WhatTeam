@@ -3,4 +3,4 @@
 // true  → 使用本地模拟数据（无需后端）
 // false → 请求真实后端接口（需启动 localhost:8080）
 // =====================================================
-export const USE_MOCK = true
+export const USE_MOCK = false

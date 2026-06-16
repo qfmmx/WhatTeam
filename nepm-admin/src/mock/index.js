@@ -25,6 +25,32 @@ function ok(data, message = '操作成功') {
   return { code: 200, message, data }
 }
 
+function fail(message, code = 400) {
+  return Promise.reject({ code, message })
+}
+
+// 依据 cityCode 解析所属省 / 市
+function resolveCity(cityCode) {
+  const city = Object.values(CITIES).flat().find(c => c.cityCode === cityCode)
+  if (!city) return null
+  const province = PROVINCES.find(p => p.id === city.provinceId)
+  return { city, province }
+}
+
+// 跨所有城市按 id 查找网格员
+function findMemberById(gmId) {
+  for (const list of Object.values(GRID_MEMBERS)) {
+    const m = list.find(x => x.id === Number(gmId))
+    if (m) return m
+  }
+  return null
+}
+
+// 本市在岗（status === 1）网格员
+function localOnDutyMembers(provinceId, cityId) {
+  return (GRID_MEMBERS[`${provinceId}-${cityId}`] || []).filter(m => m.status === 1)
+}
+
 // ─── 管理员模块 ──────────────────────────────────────────
 export const mockAdmins = {
   async login({ adminCode, password }) {
@@ -258,5 +284,102 @@ export const mockStatistics = {
     const coveredCodes = new Set(STATISTICS_RECORDS.map(s => s.cityCode))
     const rate = ((coveredCodes.size / 106) * 100).toFixed(1) + '%'
     return ok(rate, '查询成功')
+  }
+}
+
+// ─── 公众监督反馈模块（admin.js）──────────────────────────
+// 智能指派规则：本市优先、外省兜底，城市权限由「后端」(本 mock) 统一校验
+export const mockFeedback = {
+  // 分页查询：复用 AQI 反馈分页，并补充城市名称
+  async page(params) {
+    const res = await mockAqiFeedback.page(params)
+    res.data.records = res.data.records.map(r => ({
+      ...r,
+      cityName: resolveCity(r.cityCode)?.city.cityName || r.cityCode
+    }))
+    return res
+  },
+
+  // 详情：依据 afId 查询，并附带城市名称
+  async detail(afId) {
+    const res = await mockAqiFeedback.getById(afId)
+    const r = resolveCity(res.data.cityCode)
+    res.data = {
+      ...res.data,
+      cityName: r?.city.cityName || res.data.cityCode,
+      provinceName: r?.province.provinceName || '-'
+    }
+    return res
+  },
+
+  // 本市网格员：后端依据 afId 反查反馈省市，匹配本市在岗人员
+  async localMembers(afId) {
+    await delay()
+    const fb = feedbackStore.find(f => f.id === Number(afId))
+    if (!fb) return fail('反馈单不存在', 404)
+    const r = resolveCity(fb.cityCode)
+    if (!r) {
+      return ok({ cityName: fb.cityCode, provinceName: '-', hasLocal: false, members: [] }, '本市无可用网格员')
+    }
+    const members = localOnDutyMembers(r.province.id, r.city.id)
+    return ok({
+      provinceId: r.province.id,
+      provinceName: r.province.provinceName,
+      cityId: r.city.id,
+      cityName: r.city.cityName,
+      hasLocal: members.length > 0,
+      members
+    }, members.length ? '查询成功' : '本市无可用网格员')
+  },
+
+  // 跨省网格员：后端先校验本市确无在岗人员，再返回外省在岗网格员
+  async crossProvinceMembers(afId) {
+    await delay()
+    const fb = feedbackStore.find(f => f.id === Number(afId))
+    if (!fb) return fail('反馈单不存在', 404)
+    const r = resolveCity(fb.cityCode)
+    if (r && localOnDutyMembers(r.province.id, r.city.id).length > 0) {
+      return fail('本市存在可用网格员，禁止跨省调派')
+    }
+    const ownProvinceId = r?.province.id
+    const result = []
+    for (const [key, list] of Object.entries(GRID_MEMBERS)) {
+      const [pid, cid] = key.split('-').map(Number)
+      if (pid === ownProvinceId) continue
+      const province = PROVINCES.find(p => p.id === pid)
+      const city = (CITIES[pid] || []).find(c => c.id === cid)
+      for (const m of list.filter(x => x.status === 1)) {
+        result.push({ ...m, provinceName: province?.provinceName, cityName: city?.cityName })
+      }
+    }
+    return ok(result, '查询成功')
+  },
+
+  // 提交指派：后端二次校验城市权限
+  async assign({ afId, gmId }) {
+    await delay(300)
+    const fb = feedbackStore.find(f => f.id === Number(afId))
+    if (!fb) return fail('反馈单不存在', 404)
+    if (fb.state !== 0) return fail('该反馈已指派，请勿重复操作')
+
+    const member = findMemberById(gmId)
+    if (!member || member.status !== 1) return fail('所选网格员不可用')
+
+    const r = resolveCity(fb.cityCode)
+    const localMembers = r ? localOnDutyMembers(r.province.id, r.city.id) : []
+    const isLocalMember = localMembers.some(m => m.id === Number(gmId))
+
+    if (localMembers.length > 0) {
+      // 本市有人 → 必须指派本市人员
+      if (!isLocalMember) return fail('本市存在可用网格员，必须指派本市人员')
+    }
+    // 本市无人 → 允许跨省（此时所选必为外省人员，已通过 status 校验）
+
+    fb.gmId = member.id
+    fb.gmName = member.memberName
+    fb.state = 1
+    fb.isRemote = localMembers.length === 0
+    fb.assignTime = new Date().toLocaleString('zh-CN').replace(/\//g, '-')
+    return ok(1, fb.isRemote ? '跨省调派成功' : '本市指派成功')
   }
 }

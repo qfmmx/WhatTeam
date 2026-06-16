@@ -49,7 +49,7 @@ async function handleLogout() {
               <el-icon><Grid /></el-icon>
               <span>公众监督数据管理</span>
             </template>
-            <el-menu-item index="/feedback/list">公众监督数据列表</el-menu-item>
+            <el-menu-item index="/feedback">公众监督数据列表</el-menu-item>
             <el-menu-item index="/aqi/list">确认AQI数据列表</el-menu-item>
           </el-sub-menu>
 
