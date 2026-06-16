@@ -5,8 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
 @TableName("grid_province")
 public class GridProvince {
@@ -15,7 +13,4 @@ public class GridProvince {
     private String provinceName;
     private String provinceAbbr;
     private String remarks;
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
-    private Integer isDeleted;
 }

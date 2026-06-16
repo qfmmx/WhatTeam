@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.aqisys.mapper.GridMemberMapper">
+
+    <select id="getGridMember" resultType="com.it.aqisys.pojo.vo.GridMemberVo">
+        select
+            gm.gm_id as id,
+            gm.gm_code as memberCode,
+            gm.gm_name as memberName,
+            gm.tel as phone,
+            gm.province_id as provinceId,
+            gp.province_name as provinceName,
+            gm.city_id as cityId,
+            gc.city_name as cityName,
+            (case when gm.state = 0 then 1 else 2 end) as status
+        from grid_member gm
+        left join grid_province gp on gm.province_id = gp.province_id
+        left join grid_city gc on gm.city_id = gc.city_id
+        where gm.province_id=#{provinceId} and gm.city_id=#{cityId}
+    </select>
+
+    <select id="getCrossMembers" resultType="com.it.aqisys.pojo.vo.GridMemberVo">
+        select
+            gm.gm_id as id,
+            gm.gm_code as memberCode,
+            gm.gm_name as memberName,
+            gm.tel as phone,
+            gm.province_id as provinceId,
+            gp.province_name as provinceName,
+            gm.city_id as cityId,
+            gc.city_name as cityName,
+            (case when gm.state = 0 then 1 else 2 end) as status
+        from grid_member gm
+        left join grid_province gp on gm.province_id = gp.province_id
+        left join grid_city gc on gm.city_id = gc.city_id
+        where gm.province_id != #{provinceId} and gm.state = 0
+    </select>
+</mapper>

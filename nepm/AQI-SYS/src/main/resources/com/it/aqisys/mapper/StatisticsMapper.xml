@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.aqisys.mapper.StatisticsMapper">
+
+    <select id="getPageItem" resultType="com.it.aqisys.pojo.vo.StatisticsVo">
+        select statistics.id id,
+               grid_city.city_id cityCode,
+               statistics.aqi_id aqiValue,
+               concat(statistics.confirm_date, ' ', statistics.confirm_time) confirmTime,
+               statistics.gm_id gmId,
+               (case when statistics.aqi_id &gt;= 3 then 1 else 0 end) isExceed
+        from statistics
+                 left join grid_city on grid_city.city_id = statistics.city_id
+        <where>
+            <if test="queryVo.cityName != null and queryVo.cityName != ''">
+                and grid_city.city_name like concat('%', #{queryVo.cityName}, '%')
+            </if>
+            <if test="queryVo.isExceed != null">
+                and (case when statistics.aqi_id &gt;= 3 then 1 else 0 end) = #{queryVo.isExceed}
+            </if>
+            <if test="queryVo.startTime != null and queryVo.startTime != ''">
+                and concat(statistics.confirm_date, ' ', statistics.confirm_time) &gt;= #{queryVo.startTime}
+            </if>
+            <if test="queryVo.endTime != null and queryVo.endTime != ''">
+                and concat(statistics.confirm_date, ' ', statistics.confirm_time) &lt;= #{queryVo.endTime}
+            </if>
+        </where>
+    </select>
+    <select id="getStatisticsDetail" resultType="com.it.aqisys.pojo.vo.StatisticsDetailVo">
+        select statistics.id               as id,
+               grid_city.city_id           as cityCode,
+               statistics.aqi_id           as aqiValue,
+               concat(statistics.confirm_date, ' ', statistics.confirm_time) as confirmTime,
+               statistics.gm_id            as gmId,
+               (case when statistics.aqi_id &gt;= 3 then 1 else 0 end) as isExceed,
+               statistics.address          as address,
+               statistics.information      as aqiFeedBackInformation,
+               aqi.chinese_explain         as aqiLevel,
+               aqi.chinese_explain         as aqiExplain,
+               grid_province.province_name as provinceName,
+               grid_city.city_name         as cityName,
+               grid_member.gm_name         as gridMemberName,
+               grid_member.tel             as gridMemberPhone,
+               supervisor.real_name        as supervisorName,
+               supervisor.tel_id           as supervisorPhone
+        from statistics
+                 left join aqi on aqi.aqi_id = statistics.aqi_id
+                 left join grid_province on grid_province.province_id = statistics.province_id
+                 left join grid_city on grid_city.city_id = statistics.city_id
+                 left join grid_member on grid_member.gm_id = statistics.gm_id
+                 left join supervisor on supervisor.tel_id = statistics.fd_id
+        where statistics.id=#{id}
+    </select>
+    <select id="groupByProvince" resultType="com.it.aqisys.pojo.vo.CountByProvinceVo">
+        select
+            gp.province_name provinceName,
+            sum(case when s.aqi_id &gt;= 3 then 1 else 0 end) exceedCount,
+            count(s.id) totalCount,
+            concat(round(sum(case when s.aqi_id &gt;= 3 then 1 else 0 end) / count(s.id) * 100, 1), '%') exceedRate
+        from statistics s
+                left join grid_province gp on gp.province_id=s.province_id
+        group by gp.province_id, gp.province_name
+    </select>
+    <select id="aqiDistribution" resultType="com.it.aqisys.pojo.vo.AQIDistributionVo">
+        select aqi.aqi_id level,
+               aqi.chinese_explain levelName,
+               count(statistics.id) count,
+               concat(ifnull(round(count(statistics.id) / nullif((select count(*) from statistics), 0) * 100, 1), 0), '%') percentage
+        from aqi
+                 left join statistics on aqi.aqi_id = statistics.aqi_id
+        group by aqi.aqi_id, aqi.chinese_explain order by aqi.aqi_id
+    </select>
+    <select id="aqiTrend" resultType="com.it.aqisys.pojo.vo.AQITrendVo">
+        select
+            substr(statistics.confirm_date, 1, 7) month,
+            sum(case when statistics.aqi_id &gt;= 3 then 1 else 0 end) exceedCount
+        from statistics group by substr(statistics.confirm_date, 1, 7) order by month
+    </select>
+    <select id="otherCount" resultType="com.it.aqisys.pojo.vo.OtherCountVo">
+        select
+            count(statistics.id) count,
+            sum(case when statistics.aqi_id  &lt; 3 then 1 else 0 end) goodAqiCount
+        from statistics
+    </select>
+
+    <select id="getPm25Statis" resultType="com.it.aqisys.pojo.vo.PollutantStatisVo">
+        select gp.province_name as name,
+               sum(case when s.spm_value &gt; 75 then 1 else 0 end) as value
+        from grid_province gp
+        left join statistics s on gp.province_id = s.province_id
+        group by gp.province_id, gp.province_name
+        order by value desc
+    </select>
+
+    <select id="getSo2Statis" resultType="com.it.aqisys.pojo.vo.PollutantStatisVo">
+        select gp.province_name as name,
+               sum(case when s.so2_value &gt; 150 then 1 else 0 end) as value
+        from grid_province gp
+        left join statistics s on gp.province_id = s.province_id
+        group by gp.province_id, gp.province_name
+        order by value desc
+    </select>
+
+    <select id="getCoStatis" resultType="com.it.aqisys.pojo.vo.PollutantStatisVo">
+        select gp.province_name as name,
+               sum(case when s.co_value &gt; 4 then 1 else 0 end) as value
+        from grid_province gp
+        left join statistics s on gp.province_id = s.province_id
+        group by gp.province_id, gp.province_name
+        order by value desc
+    </select>
+</mapper>

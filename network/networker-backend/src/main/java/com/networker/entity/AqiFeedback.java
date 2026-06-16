@@ -5,9 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 @Data
 @TableName("aqi_feedback")
 public class AqiFeedback {
@@ -19,14 +16,11 @@ public class AqiFeedback {
     private String address;
     private String information;
     private Integer estimatedGrade;
-    private LocalDate afDate;
+    private String afDate;
     private String afTime;
-    private String gmId;
-    private LocalDate assignDate;
+    private Integer gmId;
+    private String assignDate;
     private String assignTime;
     private Integer state;
     private String remarks;
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
-    private Integer isDeleted;
 }

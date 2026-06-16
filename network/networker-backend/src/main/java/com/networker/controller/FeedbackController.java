@@ -40,8 +40,7 @@ public class FeedbackController {
             feedback1.setInformation("用户反馈空气质量较差，有明显异味");
             feedback1.setEstimatedGrade(3);
             feedback1.setState(1);
-            feedback1.setGmId("13511112222");
-            feedback1.setIsDeleted(0);
+            feedback1.setGmId(1);
             aqiFeedbackService.save(feedback1);
 
             AqiFeedback feedback2 = new AqiFeedback();
@@ -52,8 +51,7 @@ public class FeedbackController {
             feedback2.setInformation("用户反馈PM2.5浓度较高");
             feedback2.setEstimatedGrade(2);
             feedback2.setState(1);
-            feedback2.setGmId("13511112222");
-            feedback2.setIsDeleted(0);
+            feedback2.setGmId(1);
             aqiFeedbackService.save(feedback2);
 
             AqiFeedback feedback3 = new AqiFeedback();
@@ -64,8 +62,7 @@ public class FeedbackController {
             feedback3.setInformation("用户反馈有轻微雾霾");
             feedback3.setEstimatedGrade(1);
             feedback3.setState(1);
-            feedback3.setGmId("13511112222");
-            feedback3.setIsDeleted(0);
+            feedback3.setGmId(1);
             aqiFeedbackService.save(feedback3);
 
             return Result.success("测试数据初始化成功");
@@ -77,7 +74,7 @@ public class FeedbackController {
     @PostMapping("/assign")
     public Result<Boolean> assign(@RequestBody Map<String, Object> data) {
         Integer afId = (Integer) data.get("afId");
-        String gmId = (String) data.get("gmId");
+        Integer gmId = (Integer) data.get("gmId");
         
         AqiFeedback feedback = aqiFeedbackService.getById(afId);
         if (feedback == null) {
@@ -92,7 +89,7 @@ public class FeedbackController {
     }
 
     @PostMapping("/list")
-    public Result<PageResult<FeedbackDTO>> list(@RequestBody PageRequest request, @RequestParam String gmId) {
+    public Result<PageResult<FeedbackDTO>> list(@RequestBody PageRequest request, @RequestParam Integer gmId) {
         try {
             PageResult<AqiFeedback> page = aqiFeedbackService.listByGmId(gmId, request);
             
@@ -129,7 +126,7 @@ public class FeedbackController {
 
     @PostMapping("/submit")
     public Result<Boolean> submit(@RequestBody Map<String, Object> data) {
-        String gmId = (String) data.get("gmId");
+        Integer gmId = (Integer) data.get("gmId");
         Integer afId = (Integer) data.get("afId");
         Integer so2 = (Integer) data.get("so2");
         Integer pm25 = (Integer) data.get("pm25");

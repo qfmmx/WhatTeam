@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.it.aqisys.mapper.AQIFeedBackMapper">
+    <update id="assignFeedBack">
+        update aqi_feedback
+        set state=1,gm_id=#{gridMemberId},assign_date=CURDATE(),assign_time=CURTIME()
+        where af_id=#{afId}
+    </update>
+
+    <select id="pageItem" resultType="com.it.aqisys.pojo.vo.AQIFeedBackVo">
+        select af.af_id as id,
+               af.tel_id as telId,
+               gc.city_id as cityCode,
+               gc.city_name as cityName,
+               af.estimated_grade as aqiValue,
+               concat(af.af_date, ' ', af.af_time) as feedbackTime,
+               af.state as state,
+               af.gm_id as gmId,
+               gm.gm_name as gmName,
+               concat(af.assign_date, ' ', af.assign_time) as assignTime,
+               af.information as remark
+        from aqi_feedback af
+                 left join grid_city gc on af.city_id = gc.city_id
+                 left join grid_member gm on af.gm_id = gm.gm_id
+        <where>
+            <if test="queryVo.state != null">
+                and af.state = #{queryVo.state}
+            </if>
+            <if test="queryVo.cityCode != null and queryVo.cityCode != ''">
+                and gc.city_id = #{queryVo.cityCode}
+            </if>
+            <if test="queryVo.telId != null and queryVo.telId != ''">
+                and af.tel_id like concat('%', #{queryVo.telId}, '%')
+            </if>
+            <if test="queryVo.startTime != null and queryVo.startTime != ''">
+                and concat(af.af_date, ' ', af.af_time) &gt;= #{queryVo.startTime}
+            </if>
+            <if test="queryVo.endTime != null and queryVo.endTime != ''">
+                and concat(af.af_date, ' ', af.af_time) &lt;= #{queryVo.endTime}
+            </if>
+        </where>
+    </select>
+    <select id="getFeedBackDetail" resultType="com.it.aqisys.pojo.vo.AQIFeedBackDetailVo">
+        select af.af_id as id,
+               af.tel_id as telId,
+               gc.city_id as cityCode,
+               gc.city_name as cityName,
+               gp.province_name as provinceName,
+               af.estimated_grade as aqiValue,
+               concat(af.af_date, ' ', af.af_time) as feedbackTime,
+               af.state as state,
+               af.gm_id as gmId,
+               gm.gm_name as gmName,
+               concat(af.assign_date, ' ', af.assign_time) as assignTime,
+               af.information as remark
+        from aqi_feedback af
+                 left join grid_city gc on af.city_id = gc.city_id
+                 left join grid_province gp on af.province_id = gp.province_id
+                 left join grid_member gm on af.gm_id = gm.gm_id
+        where af_id=#{afId}
+    </select>
+</mapper>

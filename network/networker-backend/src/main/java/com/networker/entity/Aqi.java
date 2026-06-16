@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -20,12 +19,9 @@ public class Aqi {
     private String takeSteps;
     private Integer so2Min;
     private Integer so2Max;
-    private BigDecimal coMin;
-    private BigDecimal coMax;
+    private Integer coMin;
+    private Integer coMax;
     private Integer spmMin;
     private Integer spmMax;
     private String remarks;
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
-    private Integer isDeleted;
 }

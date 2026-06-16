@@ -16,7 +16,7 @@ public class FeedbackDTO {
     private Integer estimatedGrade;
     private String afDate;
     private String afTime;
-    private String gmId;
+    private Integer gmId;
     private String assignDate;
     private String assignTime;
     private Integer state;

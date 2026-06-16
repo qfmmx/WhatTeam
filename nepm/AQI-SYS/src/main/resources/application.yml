@@ -1,0 +1,45 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/nepu_environment?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    type: com.alibaba.druid.pool.DruidDataSource
+    # Druid 连接池核心配置
+    druid:
+      # 初始化连接数
+      initial-size: 5
+      # 最小空闲连接
+      min-idle: 5
+      # 最大连接数
+      max-active: 20
+      # 获取连接等待超时时间（毫秒）
+      max-wait: 60000
+      # 检测空闲连接间隔
+      time-between-eviction-runs-millis: 60000
+      # 连接最小生存时间
+      min-evictable-idle-time-millis: 300000
+      # 测试连接是否有效
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+
+      stat-view-servlet:
+        enabled: true
+        # 监控页面访问地址
+        url-pattern: /druid/*
+    # 登录账号密码
+        login-username: admin
+        login-password: 123456
+
+mybatis-plus:
+  mapper-locations: classpath:/com/it/aqisys/mapper/*.xml # 设置mapper.xml文件位置
+  type-aliases-package: com.it.aqisys.pojo # 设置类型别名·
+logging:
+  level:
+    com.it.aqisys.mapper: debug

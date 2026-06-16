@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Service
@@ -25,7 +24,7 @@ public class StatisticsService extends ServiceImpl<StatisticsMapper, Statistics>
         this.aqiService = aqiService;
     }
 
-    public boolean saveMeasureData(String gmId, Integer afId, Integer so2, Double co, Integer pm25) {
+    public boolean saveMeasureData(Integer gmId, Integer afId, Integer so2, Double co, Integer pm25) {
         try {
             // 获取反馈信息
             AqiFeedback feedback = aqiFeedbackMapper.selectById(afId);
@@ -44,17 +43,14 @@ public class StatisticsService extends ServiceImpl<StatisticsMapper, Statistics>
                 statistics.setAqiId(aqi.getAqiId());
             }
             statistics.setSo2Value(so2);
-            statistics.setCoValue(co);
+            statistics.setCoValue(co.intValue());
             statistics.setSpmValue(pm25);
-            statistics.setMonitorDate(LocalDate.now().toString());
-            statistics.setMonitorTime(LocalTime.now().toString());
-            statistics.setIsDeleted(0);
-            statistics.setCreateTime(LocalDateTime.now());
-            statistics.setUpdateTime(LocalDateTime.now());
+            statistics.setConfirmDate(LocalDate.now().toString());
+            statistics.setConfirmTime(LocalTime.now().toString());
             
             // 填充缺失的字段
             statistics.setAddress(feedback.getAddress());
-            statistics.setFdId(afId);
+            statistics.setFdId(feedback.getTelId());
             statistics.setInformation(feedback.getInformation());
             
             // 计算等级 (根据数值范围计算)
@@ -67,7 +63,6 @@ public class StatisticsService extends ServiceImpl<StatisticsMapper, Statistics>
 
             // 更新反馈状态为已实测 (state = 2)
             feedback.setState(2);
-            feedback.setUpdateTime(LocalDateTime.now());
             aqiFeedbackMapper.updateById(feedback);
 
             return true;

@@ -5,13 +5,11 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
 @TableName("grid_member")
 public class GridMember {
-    @TableId(type = IdType.INPUT)
-    private String gmId;
+    @TableId(type = IdType.AUTO)
+    private Integer gmId;
     private String gmName;
     private String gmCode;
     private String password;
@@ -20,7 +18,4 @@ public class GridMember {
     private String tel;
     private Integer state;
     private String remarks;
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
-    private Integer isDeleted;
 }

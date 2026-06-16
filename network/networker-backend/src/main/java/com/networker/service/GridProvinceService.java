@@ -13,8 +13,7 @@ public class GridProvinceService extends ServiceImpl<GridProvinceMapper, GridPro
 
     public List<GridProvince> listAll() {
         LambdaQueryWrapper<GridProvince> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(GridProvince::getIsDeleted, 0)
-               .orderByAsc(GridProvince::getProvinceId);
+        wrapper.orderByAsc(GridProvince::getProvinceId);
         return this.list(wrapper);
     }
 }

@@ -1,34 +1,34 @@
 package com.networker.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 @Data
 @TableName("statistics")
 public class Statistics {
     @TableId(type = IdType.AUTO)
-    private Integer statId;
-    private String gmId;
+    private Integer id;
     private Integer provinceId;
     private Integer cityId;
-    private Integer aqiId;
-    private Integer so2Value;
-    private Double coValue;
-    private Integer spmValue;
-    private String monitorDate;
-    private String monitorTime;
-    private String remarks;
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
-    private Integer isDeleted;
     private String address;
+    private Integer so2Value;
     private Integer so2Level;
+    private Integer coValue;
     private Integer coLevel;
+    private Integer spmValue;
     private Integer spmLevel;
-    private Integer fdId;
+    private Integer aqiId;
+    @TableField("confirm_date")
+    private String confirmDate;
+    @TableField("confirm_time")
+    private String confirmTime;
+    @TableField("gm_id")
+    private Integer gmId;
+    @TableField("fd_id")
+    private String fdId;
     private String information;
+    private String remarks;
 }

@@ -13,8 +13,7 @@ public class AqiService extends ServiceImpl<AqiMapper, Aqi> {
 
     public List<Aqi> listAll() {
         LambdaQueryWrapper<Aqi> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Aqi::getIsDeleted, 0)
-               .orderByAsc(Aqi::getAqiId);
+        wrapper.orderByAsc(Aqi::getAqiId);
         return this.list(wrapper);
     }
 

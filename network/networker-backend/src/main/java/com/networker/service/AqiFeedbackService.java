@@ -18,7 +18,6 @@ public class AqiFeedbackService extends ServiceImpl<AqiFeedbackMapper, AqiFeedba
     public PageResult<AqiFeedback> listPage(PageRequest request) {
         Page<AqiFeedback> page = new Page<>(request.getPageNum(), request.getPageSize());
         LambdaQueryWrapper<AqiFeedback> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AqiFeedback::getIsDeleted, 0);
 
         if (StringUtils.hasText(request.getKeyword())) {
             wrapper.like(AqiFeedback::getAddress, request.getKeyword())
@@ -33,39 +32,36 @@ public class AqiFeedbackService extends ServiceImpl<AqiFeedbackMapper, AqiFeedba
             wrapper.eq(AqiFeedback::getCityId, request.getCityId());
         }
 
-        wrapper.orderByDesc(AqiFeedback::getCreateTime);
+        wrapper.orderByDesc(AqiFeedback::getAfDate);
         Page<AqiFeedback> result = this.page(page, wrapper);
 
         return PageResult.of(result.getTotal(), result.getRecords(), request.getPageNum(), request.getPageSize());
     }
 
-    public PageResult<AqiFeedback> listByGmId(String gmId, PageRequest request) {
+    public PageResult<AqiFeedback> listByGmId(Integer gmId, PageRequest request) {
         Page<AqiFeedback> page = new Page<>(request.getPageNum(), request.getPageSize());
         LambdaQueryWrapper<AqiFeedback> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AqiFeedback::getIsDeleted, 0)
-               .eq(AqiFeedback::getState, 1)
+        wrapper.eq(AqiFeedback::getState, 1)
                .eq(AqiFeedback::getGmId, gmId);
 
-        wrapper.orderByDesc(AqiFeedback::getCreateTime);
+        wrapper.orderByDesc(AqiFeedback::getAfDate);
         Page<AqiFeedback> result = this.page(page, wrapper);
 
         return PageResult.of(result.getTotal(), result.getRecords(), request.getPageNum(), request.getPageSize());
     }
 
     public boolean saveFeedback(AqiFeedback feedback) {
-        feedback.setAfDate(LocalDate.now());
+        feedback.setAfDate(LocalDate.now().toString());
         feedback.setAfTime(java.time.LocalTime.now().toString());
         feedback.setState(0);
-        feedback.setCreateTime(LocalDate.now().atStartOfDay());
-        feedback.setUpdateTime(LocalDate.now().atStartOfDay());
         return this.save(feedback);
     }
 
-    public boolean assignFeedback(Integer afId, String gmId) {
+    public boolean assignFeedback(Integer afId, Integer gmId) {
         AqiFeedback feedback = this.getById(afId);
         if (feedback == null) return false;
         feedback.setGmId(gmId);
-        feedback.setAssignDate(LocalDate.now());
+        feedback.setAssignDate(LocalDate.now().toString());
         feedback.setAssignTime(java.time.LocalTime.now().toString());
         feedback.setState(1);
         return this.updateById(feedback);
@@ -78,12 +74,11 @@ public class AqiFeedbackService extends ServiceImpl<AqiFeedbackMapper, AqiFeedba
         return this.updateById(feedback);
     }
 
-    public boolean submitMeasureData(String gmId, Integer afId, Integer so2, Double co, Integer pm25) {
+    public boolean submitMeasureData(Integer gmId, Integer afId, Integer so2, Double co, Integer pm25) {
         if (afId == null) return false;
         AqiFeedback feedback = this.getById(afId);
         if (feedback == null) return false;
         feedback.setState(2);
-        feedback.setUpdateTime(java.time.LocalDateTime.now());
         return this.updateById(feedback);
     }
 }
