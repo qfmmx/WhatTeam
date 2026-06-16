@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 # 全量接口冒烟测试（Windows / PowerShell）—— 覆盖三个后端所有路由
 # 判定：HTTP 200 → PASS；4xx → WARN；000/5xx → FAIL
 # 运行： powershell -ExecutionPolicy Bypass -File scripts\test-api.ps1
