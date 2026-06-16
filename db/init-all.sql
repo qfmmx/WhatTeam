@@ -1,936 +1,577 @@
 -- ============================================================
--- NEPM 项目一键建库脚本（自动生成，请勿手改本文件头）
--- 一次性创建 3 个数据库并导入相同的 8 张表 + 种子数据：
---   nepu_environment  → AQI-SYS(管理端)
---   nepu             → networker-backend(网格员端)
---   nep              → supervisor-backend(监督员端)
--- 运行： bash scripts/init-db.sh   （或见文件尾说明）
+-- NEPM 项目一键建库脚本（自动生成）
+-- 采用与后端实体匹配的 aqstest 结构（int 自增主键），并附种子数据。
+-- 创建 3 个库：nepu_environment(管理端) / nepu(网格员端) / nep(监督员端)
+-- 运行： bash scripts/init-db.sh   （Windows: scripts\init-db.ps1）
 -- ============================================================
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS=0;
 
--- ========== 数据库 nepu_environment ==========
+-- ========================= 数据库 nepu_environment =========================
 CREATE DATABASE IF NOT EXISTS `nepu_environment` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `nepu_environment`;
--- MySQL dump 10.13  Distrib 5.7.22, for Win64 (x86_64)
---
--- Host: localhost    Database: nepu_environment
--- ------------------------------------------------------
--- Server version	5.5.13
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
---
--- Table structure for table `admins`
---
-
+-- ----------------------------
+-- Table structure for admins
+-- ----------------------------
 DROP TABLE IF EXISTS `admins`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `admins` (
-  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
-  `admin_code` varchar(20) DEFAULT NULL COMMENT '系统管理员登录编码',
-  `password` varchar(20) DEFAULT NULL COMMENT '系统管理员登录密码',
-  `remarks` varchar(100) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`admin_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COMMENT='系统管理员表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `admins`  (
+  `admin_id` int NOT NULL AUTO_INCREMENT COMMENT '系统管理员编号',
+  `admin_code` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统管理员登录编码',
+  `password` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统管理员登录密码',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`admin_id`) USING BTREE,
+  UNIQUE INDEX `dis_code`(`admin_code` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `admins`
---
-
-LOCK TABLES `admins` WRITE;
-/*!40000 ALTER TABLE `admins` DISABLE KEYS */;
-INSERT INTO `admins` VALUES (1,'AD001','123456','系统超级管理员','2025-12-10 09:00:00','2026-06-04 03:17:12',0),(2,'AD002','654321','后台运维管理员','2025-12-10 09:10:00','2026-06-04 03:17:12',0);
-/*!40000 ALTER TABLE `admins` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `aqi`
---
-
+-- ----------------------------
+-- Table structure for aqi
+-- ----------------------------
 DROP TABLE IF EXISTS `aqi`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `aqi` (
-  `aqi_id` int(11) NOT NULL AUTO_INCREMENT,
-  `chinese_explain` varchar(10) DEFAULT NULL COMMENT '空气质量指数级别汉字表述',
-  `aqi_explain` varchar(20) DEFAULT NULL COMMENT '空气质量指数级别描述',
-  `color` varchar(7) DEFAULT NULL COMMENT '空气质量指数级别表示颜色',
-  `health_impact` varchar(500) DEFAULT NULL COMMENT '对健康影响情况',
-  `take_steps` varchar(500) DEFAULT NULL COMMENT '建议采取的措施',
-  `so2_min` int(11) DEFAULT NULL COMMENT '本级别二氧化硫浓度最小限值',
-  `so2_max` int(11) DEFAULT NULL COMMENT '本级别二氧化硫浓度最大限值',
-  `co_min` int(11) DEFAULT NULL COMMENT '本级别一氧化碳浓度最小限值',
-  `co_max` int(11) DEFAULT NULL COMMENT '本级别一氧化碳浓度最大限值',
-  `spm_min` int(11) DEFAULT NULL COMMENT '本级别悬浮颗粒物浓度最小限值',
-  `spm_max` int(11) DEFAULT NULL COMMENT '本级别悬浮颗粒物浓度最大限值',
-  `remarks` varchar(100) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`aqi_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COMMENT='空气质量指数级别表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `aqi`  (
+  `aqi_id` int NOT NULL AUTO_INCREMENT COMMENT '空气质量指数级别(共六级)',
+  `chinese_explain` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '空气质量指数级别汉字表述',
+  `aqi_explain` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '空气质量指数级别描述',
+  `color` varchar(7) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '空气质量指数级别表示颜色',
+  `health_impact` varchar(500) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '对健康影响情况',
+  `take_steps` varchar(500) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '建议采取的措施',
+  `so2_min` int NOT NULL COMMENT '本级别二氧化硫浓度最小限值',
+  `so2_max` int NOT NULL COMMENT '本级别二氧化硫浓度最大限值',
+  `co_min` int NOT NULL COMMENT '本级别一氧化碳浓度最小限值',
+  `co_max` int NOT NULL COMMENT '本级别一氧化碳浓度最大限值',
+  `spm_min` int NOT NULL COMMENT '本级别悬浮颗粒物浓度最小限值',
+  `spm_max` int NOT NULL COMMENT '本级别悬浮颗粒物浓度最大限值',
+  `remarks` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`aqi_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `aqi`
---
-
-LOCK TABLES `aqi` WRITE;
-/*!40000 ALTER TABLE `aqi` DISABLE KEYS */;
-INSERT INTO `aqi` VALUES (1,'优','一级','#00E400','空气质量令人满意，基本无空气污染','各类人群可正常活动',0,50,0,2,0,35,NULL,NULL,'0000-00-00 00:00:00',0),(2,'良','二级','#FFFF00','空气质量可接受，但某些污染物可能对极少数异常敏感人群健康有较弱影响','极少数异常敏感人群应减少户外活动',51,150,3,4,36,75,NULL,NULL,'0000-00-00 00:00:00',0),(3,'轻度污染','三级','#FF7E00','易感人群症状有轻度加剧，健康人群出现刺激症状','儿童、老年人及心脏病、呼吸系统疾病患者应减少长时间、高强度的户外锻炼',151,475,5,14,76,115,NULL,NULL,'0000-00-00 00:00:00',0),(4,'中度污染','四级','#FF0000','进一步加剧易感人群症状，可能对健康人群心脏、呼吸系统有影响','儿童、老年人及心脏病、呼吸系统疾病患者应避免长时间、高强度的户外锻炼，一般人群适量减少户外活动',476,800,15,24,116,150,NULL,NULL,'0000-00-00 00:00:00',0),(5,'重度污染','五级','#8F3F97','心脏病和肺病患者症状显著加剧，运动耐受力降低，健康人群普遍出现症状','儿童、老年人和心脏病、肺病患者应停留在室内，停止户外活动，一般人群应减少户外活动',801,1600,25,36,151,250,NULL,NULL,'0000-00-00 00:00:00',0),(6,'严重污染','六级','#7E0023','健康人群运动耐受力降低，有明显强烈症状，提前出现某些疾病','儿童、老年人和病人应当留在室内，避免体力消耗，一般人群应避免户外活动',1601,2100,37,48,251,500,NULL,NULL,'0000-00-00 00:00:00',0),(7,'优','Excellent','#00e600',NULL,NULL,0,50,0,10,0,35,NULL,NULL,'2026-06-05 02:30:57',0),(8,'良','Good','#ffff00',NULL,NULL,51,100,11,20,36,75,NULL,NULL,'2026-06-05 02:30:57',0);
-/*!40000 ALTER TABLE `aqi` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `aqi_feedback`
---
-
+-- ----------------------------
+-- Table structure for aqi_feedback
+-- ----------------------------
 DROP TABLE IF EXISTS `aqi_feedback`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `aqi_feedback` (
-  `af_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '空气质量公众监督反馈信息编号',
-  `tel_id` varchar(20) DEFAULT NULL COMMENT '所属公众监督员编号（即手机号码）',
-  `province_id` int(11) DEFAULT NULL COMMENT '反馈信息所在省区域编号',
-  `city_id` int(11) DEFAULT NULL COMMENT '反馈信息所在市区域编号',
-  `address` varchar(200) DEFAULT NULL COMMENT '反馈信息所在区域详细地址',
-  `information` varchar(400) DEFAULT NULL COMMENT '反馈信息描述',
-  `estimated_grade` int(11) DEFAULT NULL COMMENT '反馈者对空气质量指数级别的预估等级',
-  `af_date` varchar(20) DEFAULT NULL COMMENT '反馈日期',
-  `af_time` varchar(20) DEFAULT NULL COMMENT '反馈时间',
-  `gm_id` int(11) DEFAULT '0' COMMENT '指派网格员编号',
-  `assign_date` varchar(20) DEFAULT NULL COMMENT '指派日期',
-  `assign_time` varchar(20) DEFAULT NULL COMMENT '指派时间',
-  `state` int(11) DEFAULT '0' COMMENT '信息状态：0=未指派，1=已指派，2=已确认',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`af_id`),
-  KEY `idx_tel_id` (`tel_id`),
-  KEY `idx_province_id` (`province_id`),
-  KEY `idx_city_id` (`city_id`),
-  KEY `idx_gm_id` (`gm_id`),
-  CONSTRAINT `aqi_feedback_ibfk_2` FOREIGN KEY (`gm_id`) REFERENCES `grid_member_old` (`gm_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='空气质量公众监督反馈表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `aqi_feedback`  (
+  `af_id` int NOT NULL AUTO_INCREMENT COMMENT '空气质量公众监督反馈信息编号',
+  `tel_id` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '所属公众监督员编号（即手机号码）',
+  `province_id` int NOT NULL COMMENT '反馈信息所在省区域编号',
+  `city_id` int NOT NULL COMMENT '反馈信息所在市区域编号',
+  `address` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息所在区域详细地址',
+  `information` varchar(400) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息描述',
+  `estimated_grade` int NOT NULL COMMENT '反馈者对空气质量指数级别的预估等级',
+  `af_date` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈日期',
+  `af_time` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈时间',
+  `gm_id` int NOT NULL DEFAULT 0 COMMENT '指派网格员编号',
+  `assign_date` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '指派日期',
+  `assign_time` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '指派时间',
+  `state` int NOT NULL COMMENT '信息状态: 0:未指派; 1:已指派; 2:已确认',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`af_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 46 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `aqi_feedback`
---
-
-LOCK TABLES `aqi_feedback` WRITE;
-/*!40000 ALTER TABLE `aqi_feedback` DISABLE KEYS */;
-/*!40000 ALTER TABLE `aqi_feedback` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `grid_city`
---
-
+-- ----------------------------
+-- Table structure for grid_city
+-- ----------------------------
 DROP TABLE IF EXISTS `grid_city`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `grid_city` (
-  `city_id` int(11) NOT NULL AUTO_INCREMENT,
-  `city_name` varchar(20) DEFAULT NULL COMMENT '系统网格覆盖市区域名称',
-  `province_id` int(11) DEFAULT NULL COMMENT '所属省区域编号',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`city_id`),
-  KEY `province_id` (`province_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COMMENT='系统网格覆盖市区域表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `grid_city`  (
+  `city_id` int NOT NULL AUTO_INCREMENT COMMENT '系统网格覆盖市区域编号',
+  `city_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统网格覆盖市区域名称',
+  `province_id` int NOT NULL COMMENT '所属省区域编号',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`city_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `grid_city`
---
-
-LOCK TABLES `grid_city` WRITE;
-/*!40000 ALTER TABLE `grid_city` DISABLE KEYS */;
-INSERT INTO `grid_city` VALUES (1,'北京市',1,NULL,NULL,'0000-00-00 00:00:00',0),(2,'上海市',2,NULL,NULL,'0000-00-00 00:00:00',0),(3,'重庆市',3,NULL,NULL,'0000-00-00 00:00:00',0),(4,'成都市',4,NULL,NULL,'0000-00-00 00:00:00',0),(5,'南岸区',1,NULL,'2026-06-05 10:30:57','2026-06-05 02:30:57',0),(6,'渝中区',1,NULL,'2026-06-05 10:30:57','2026-06-05 02:30:57',0);
-/*!40000 ALTER TABLE `grid_city` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `grid_member`
---
-
+-- ----------------------------
+-- Table structure for grid_member
+-- ----------------------------
 DROP TABLE IF EXISTS `grid_member`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `grid_member` (
-  `gm_id` varchar(11) NOT NULL,
-  `gm_name` varchar(20) DEFAULT NULL COMMENT '网格员名称',
-  `gm_code` varchar(20) DEFAULT NULL COMMENT '网格员登录编码',
-  `password` varchar(20) DEFAULT NULL COMMENT '登录密码',
-  `province_id` int(11) DEFAULT NULL COMMENT '网格区域：省编号',
-  `city_id` int(11) DEFAULT NULL COMMENT '网格区域：市编号',
-  `tel` varchar(20) DEFAULT NULL COMMENT '联系电话',
-  `state` int(11) DEFAULT '0' COMMENT '网格员状态 0:可工作 1:临时抽调 2:休假 3:其它',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`gm_id`),
-  KEY `province_id` (`province_id`),
-  KEY `city_id` (`city_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='空气质量监测网格员表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `grid_member`  (
+  `gm_id` int NOT NULL AUTO_INCREMENT COMMENT '网格员编号',
+  `gm_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '网格员名称',
+  `gm_code` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '网格员登录编码',
+  `password` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '格网员登录密码',
+  `province_id` int NOT NULL COMMENT '网格区域：省编号',
+  `city_id` int NOT NULL COMMENT '网格区域：市编号',
+  `tel` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '联系电话',
+  `state` int NOT NULL DEFAULT 0 COMMENT '网格员状态（0:工作状态; 1:非工作状态（由考勤系统管理）; 2:其它）',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`gm_id`) USING BTREE,
+  UNIQUE INDEX `gm_code`(`gm_code` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 35 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `grid_member`
---
-
-LOCK TABLES `grid_member` WRITE;
-/*!40000 ALTER TABLE `grid_member` DISABLE KEYS */;
-INSERT INTO `grid_member` VALUES ('13511112222','王小龙','GM001','grid111',1,1,'13511112222',0,'城东网格员','2025-12-10 11:00:00','2026-06-04 03:17:29',0),('13512345678','张三','G001','123456',1,1,'13512345678',1,'南岸网格员','2026-06-05 10:30:35','2026-06-05 02:30:35',0),('13512345679','李四','G002','123456',1,2,'13512345679',1,'渝中网格员','2026-06-05 10:30:35','2026-06-05 02:30:35',0),('13522223333','刘芳芳','GM002','grid222',1,2,'13522223333',0,'城西网格员','2025-12-10 11:08:00','2026-06-04 03:17:29',0);
-/*!40000 ALTER TABLE `grid_member` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `grid_province`
---
-
+-- ----------------------------
+-- Table structure for grid_province
+-- ----------------------------
 DROP TABLE IF EXISTS `grid_province`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `grid_province` (
-  `province_id` int(11) NOT NULL AUTO_INCREMENT,
-  `province_name` varchar(20) DEFAULT NULL COMMENT '系统网格覆盖省区域名称',
-  `province_abbr` varchar(2) DEFAULT NULL COMMENT '系统网格覆盖省区域简称',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`province_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COMMENT='系统网格覆盖省区域表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `grid_province`  (
+  `province_id` int NOT NULL AUTO_INCREMENT COMMENT '系统网格覆盖省区域编号',
+  `province_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统网格覆盖省区域名称',
+  `province_abbr` varchar(2) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统网格覆盖省区域简称',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`province_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `grid_province`
---
-
-LOCK TABLES `grid_province` WRITE;
-/*!40000 ALTER TABLE `grid_province` DISABLE KEYS */;
-INSERT INTO `grid_province` VALUES (1,'北京市','京',NULL,NULL,'0000-00-00 00:00:00',0),(2,'上海市','沪',NULL,NULL,'0000-00-00 00:00:00',0),(3,'重庆市','渝',NULL,NULL,'0000-00-00 00:00:00',0),(4,'四川省','川',NULL,NULL,'0000-00-00 00:00:00',0),(5,'重庆市','渝',NULL,'2026-06-05 10:30:57','2026-06-05 02:30:57',0);
-/*!40000 ALTER TABLE `grid_province` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `statistics`
---
-
+-- ----------------------------
+-- Table structure for statistics
+-- ----------------------------
 DROP TABLE IF EXISTS `statistics`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `statistics` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `gm_id` int(11) DEFAULT NULL,
-  `province_id` int(11) DEFAULT NULL COMMENT '所属省编号',
-  `city_id` int(11) DEFAULT NULL COMMENT '所属市编号',
-  `aqi_id` int(11) DEFAULT NULL COMMENT '所属AQI级别编号',
-  `so2_value` int(11) DEFAULT NULL COMMENT '实测二氧化硫浓度',
-  `co_value` int(11) DEFAULT NULL COMMENT '实测一氧化碳浓度',
-  `spm_value` int(11) DEFAULT NULL COMMENT '实测悬浮颗粒物浓度',
-  `confirm_date` varchar(20) DEFAULT NULL,
-  `confirm_time` varchar(20) DEFAULT NULL,
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  `address` varchar(200) DEFAULT NULL COMMENT '反馈信息所在区域详细地址',
-  `so2_level` int(11) DEFAULT NULL COMMENT '空气二氧化硫指数级别',
-  `co_level` int(11) DEFAULT NULL COMMENT '空气一氧化碳指数级别',
-  `spm_level` int(11) DEFAULT NULL COMMENT '空气PM2.5指数级别',
-  `fd_id` varchar(20) DEFAULT NULL COMMENT '反馈者编号（公众监督员电话号码）',
-  `information` varchar(400) DEFAULT NULL COMMENT '反馈信息描述',
-  PRIMARY KEY (`id`),
-  KEY `aqi_id` (`aqi_id`),
-  KEY `gm_id` (`gm_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='监测统计表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `statistics`  (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '统计信息编号',
+  `province_id` int NOT NULL COMMENT '所属省区域编号',
+  `city_id` int NOT NULL COMMENT '所属市区域编号',
+  `address` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息所在区域详细地址',
+  `so2_value` int NOT NULL COMMENT '空气二氧化硫浓度值（单位：μg/m3）',
+  `so2_level` int NOT NULL COMMENT '空气二氧化硫指数级别',
+  `co_value` int NOT NULL COMMENT '空气一氧化碳浓度值（单位：μg/m3）',
+  `co_level` int NOT NULL COMMENT '空气一氧化碳指数级别',
+  `spm_value` int NOT NULL COMMENT '空气悬浮颗粒物浓度值（单位：μg/m3）',
+  `spm_level` int NOT NULL COMMENT '空气PM2.5指数级别',
+  `aqi_id` int NOT NULL COMMENT '空气质量指数级别',
+  `confirm_date` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '确认日期',
+  `confirm_time` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '确认时间',
+  `gm_id` int NOT NULL COMMENT '所属网格员编号',
+  `fd_id` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈者编号（公众监督员电话号码）',
+  `information` varchar(400) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息描述',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 44 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `statistics`
---
-
-LOCK TABLES `statistics` WRITE;
-/*!40000 ALTER TABLE `statistics` DISABLE KEYS */;
-/*!40000 ALTER TABLE `statistics` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `supervisor`
---
-
+-- ----------------------------
+-- Table structure for supervisor
+-- ----------------------------
 DROP TABLE IF EXISTS `supervisor`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `supervisor` (
-  `tel_id` varchar(11) NOT NULL,
-  `password` varchar(20) DEFAULT NULL COMMENT '公众监督员登录密码',
-  `real_name` varchar(20) DEFAULT NULL COMMENT '公众监督员真实姓名',
-  `birthday` varchar(20) DEFAULT NULL COMMENT '公众监督员出生日期',
-  `sex` int(11) DEFAULT '1' COMMENT '公众监督员性别(1:男;0:女)',
-  `remarks` varchar(100) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`tel_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='公众监督员表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `supervisor`  (
+  `tel_id` varchar(11) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员编号（即手机号码）',
+  `password` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员登录密码',
+  `real_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员真实姓名',
+  `birthday` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员出生日期',
+  `sex` int NOT NULL DEFAULT 1 COMMENT '公众监督员性别（1：男；0：女）',
+  `remarks` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`tel_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `supervisor`
---
+-- ---------- 种子数据（与 aqstest 结构匹配）----------
+INSERT INTO `admins` (`admin_id`,`admin_code`,`password`,`remarks`) VALUES
+(1,'AD001','123456','系统管理员'),
+(2,'AD002','654321','管理员二');
 
-LOCK TABLES `supervisor` WRITE;
-/*!40000 ALTER TABLE `supervisor` DISABLE KEYS */;
-INSERT INTO `supervisor` VALUES ('13800138001','sup123','张建国','1985-03-12',1,'城区督查','2025-12-10 10:00:00','2026-06-04 03:17:22',0),('13900139002','sup456','李美玲','1988-07-25',2,'郊区督查','2025-12-10 10:05:00','2026-06-04 03:17:22',0);
-/*!40000 ALTER TABLE `supervisor` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+INSERT INTO `grid_province` (`province_id`,`province_name`,`province_abbr`,`remarks`) VALUES
+(1,'北京市','京',NULL),(2,'上海市','沪',NULL),(3,'辽宁省','辽',NULL),
+(4,'江苏省','苏',NULL),(5,'广东省','粤',NULL);
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+INSERT INTO `grid_city` (`city_id`,`city_name`,`province_id`,`remarks`) VALUES
+(1,'东城区',1,NULL),(2,'朝阳区',1,NULL),(3,'浦东新区',2,NULL),
+(4,'大连市',3,NULL),(5,'沈阳市',3,NULL),(6,'南京市',4,NULL),(7,'广州市',5,NULL);
 
--- Dump completed on 2026-06-05 11:26:56
+-- 网格员：state=0 为可工作（登录要求 state=0）
+INSERT INTO `grid_member` (`gm_id`,`gm_name`,`gm_code`,`password`,`province_id`,`city_id`,`tel`,`state`,`remarks`) VALUES
+(1,'张网格','GM001','grid111',1,1,'13511112222',0,NULL),
+(2,'李网格','GM002','grid222',1,2,'13522223333',0,NULL),
+(3,'王网格','GM003','grid333',2,3,'13533334444',0,NULL),
+(4,'赵网格','GM004','grid444',3,4,'13544445555',0,NULL),
+(5,'钱网格','GM005','grid555',4,6,'13555556666',0,NULL);
 
--- ========== 数据库 nepu ==========
+INSERT INTO `aqi` (`aqi_id`,`chinese_explain`,`aqi_explain`,`color`,`health_impact`,`take_steps`,`so2_min`,`so2_max`,`co_min`,`co_max`,`spm_min`,`spm_max`,`remarks`) VALUES
+(1,'优','一级','绿色','空气质量令人满意，基本无空气污染','各类人群可正常活动',0,50,0,5,0,50,NULL),
+(2,'良','二级','黄色','空气质量可接受','极少数异常敏感人群应减少户外活动',50,150,5,10,50,150,NULL),
+(3,'轻度污染','三级','橙色','易感人群症状有轻度加剧','儿童老人及心脏病、呼吸系统疾病患者应减少长时间户外活动',150,475,10,35,150,250,NULL),
+(4,'中度污染','四级','红色','进一步加剧易感人群症状','减少户外运动',475,800,35,60,250,350,NULL),
+(5,'重度污染','五级','紫色','心脏病和肺病患者症状显著加剧','停止户外活动',800,1600,60,90,350,420,NULL),
+(6,'严重污染','六级','褐红色','健康人群运动耐受力降低','避免户外活动',1600,2100,90,120,420,500,NULL);
+
+-- 反馈：state 0未指派 / 1已指派 / 2已确认
+INSERT INTO `aqi_feedback` (`af_id`,`tel_id`,`province_id`,`city_id`,`address`,`information`,`estimated_grade`,`af_date`,`af_time`,`gm_id`,`assign_date`,`assign_time`,`state`,`remarks`) VALUES
+(1,'13800000001',1,1,'北京市东城区某街道','空气浑浊有异味',3,'2026-06-10','09:30:00',0,NULL,NULL,0,NULL),
+(2,'13800000002',1,2,'北京市朝阳区某路','雾霾严重能见度低',4,'2026-06-11','10:15:00',0,NULL,NULL,0,NULL),
+(3,'13800000003',2,3,'上海市浦东新区某小区','PM2.5偏高',4,'2026-06-12','08:40:00',0,NULL,NULL,0,NULL),
+(4,'13800000004',3,4,'辽宁省大连市某厂区','工厂排放刺鼻',5,'2026-06-13','07:50:00',4,'2026-06-13','09:00:00',1,NULL),
+(5,'13800000005',4,6,'江苏省南京市某街','焚烧秸秆烟雾大',5,'2026-06-09','16:20:00',5,'2026-06-09','17:00:00',2,NULL);
+
+INSERT INTO `statistics` (`id`,`province_id`,`city_id`,`address`,`so2_value`,`so2_level`,`co_value`,`co_level`,`spm_value`,`spm_level`,`aqi_id`,`confirm_date`,`confirm_time`,`gm_id`,`fd_id`,`information`,`remarks`) VALUES
+(1,1,1,'北京市东城区',30,1,3,1,40,1,1,'2026-06-10','12:00:00',1,'13800000001','空气优',NULL),
+(2,1,2,'北京市朝阳区',120,2,8,2,100,2,2,'2026-06-11','12:30:00',2,'13800000002','空气良',NULL),
+(3,2,3,'上海市浦东新区',300,3,20,3,200,3,3,'2026-06-12','11:00:00',3,'13800000003','轻度污染',NULL),
+(4,3,4,'辽宁省大连市',600,4,50,4,300,4,4,'2026-06-13','10:00:00',4,'13800000004','中度污染',NULL),
+(5,4,6,'江苏省南京市',1000,5,70,5,380,5,5,'2026-06-09','18:00:00',5,'13800000005','重度污染',NULL);
+
+INSERT INTO `supervisor` (`tel_id`,`password`,`real_name`,`birthday`,`sex`,`remarks`) VALUES
+('13800000001','123456','张三','1990-05-12',1,NULL),
+('13800000002','123456','李四','1992-08-20',0,NULL);
+
+-- ========================= 数据库 nepu =========================
 CREATE DATABASE IF NOT EXISTS `nepu` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `nepu`;
--- MySQL dump 10.13  Distrib 5.7.22, for Win64 (x86_64)
---
--- Host: localhost    Database: nepu_environment
--- ------------------------------------------------------
--- Server version	5.5.13
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
---
--- Table structure for table `admins`
---
-
+-- ----------------------------
+-- Table structure for admins
+-- ----------------------------
 DROP TABLE IF EXISTS `admins`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `admins` (
-  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
-  `admin_code` varchar(20) DEFAULT NULL COMMENT '系统管理员登录编码',
-  `password` varchar(20) DEFAULT NULL COMMENT '系统管理员登录密码',
-  `remarks` varchar(100) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`admin_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COMMENT='系统管理员表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `admins`  (
+  `admin_id` int NOT NULL AUTO_INCREMENT COMMENT '系统管理员编号',
+  `admin_code` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统管理员登录编码',
+  `password` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统管理员登录密码',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`admin_id`) USING BTREE,
+  UNIQUE INDEX `dis_code`(`admin_code` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `admins`
---
-
-LOCK TABLES `admins` WRITE;
-/*!40000 ALTER TABLE `admins` DISABLE KEYS */;
-INSERT INTO `admins` VALUES (1,'AD001','123456','系统超级管理员','2025-12-10 09:00:00','2026-06-04 03:17:12',0),(2,'AD002','654321','后台运维管理员','2025-12-10 09:10:00','2026-06-04 03:17:12',0);
-/*!40000 ALTER TABLE `admins` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `aqi`
---
-
+-- ----------------------------
+-- Table structure for aqi
+-- ----------------------------
 DROP TABLE IF EXISTS `aqi`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `aqi` (
-  `aqi_id` int(11) NOT NULL AUTO_INCREMENT,
-  `chinese_explain` varchar(10) DEFAULT NULL COMMENT '空气质量指数级别汉字表述',
-  `aqi_explain` varchar(20) DEFAULT NULL COMMENT '空气质量指数级别描述',
-  `color` varchar(7) DEFAULT NULL COMMENT '空气质量指数级别表示颜色',
-  `health_impact` varchar(500) DEFAULT NULL COMMENT '对健康影响情况',
-  `take_steps` varchar(500) DEFAULT NULL COMMENT '建议采取的措施',
-  `so2_min` int(11) DEFAULT NULL COMMENT '本级别二氧化硫浓度最小限值',
-  `so2_max` int(11) DEFAULT NULL COMMENT '本级别二氧化硫浓度最大限值',
-  `co_min` int(11) DEFAULT NULL COMMENT '本级别一氧化碳浓度最小限值',
-  `co_max` int(11) DEFAULT NULL COMMENT '本级别一氧化碳浓度最大限值',
-  `spm_min` int(11) DEFAULT NULL COMMENT '本级别悬浮颗粒物浓度最小限值',
-  `spm_max` int(11) DEFAULT NULL COMMENT '本级别悬浮颗粒物浓度最大限值',
-  `remarks` varchar(100) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`aqi_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COMMENT='空气质量指数级别表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `aqi`  (
+  `aqi_id` int NOT NULL AUTO_INCREMENT COMMENT '空气质量指数级别(共六级)',
+  `chinese_explain` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '空气质量指数级别汉字表述',
+  `aqi_explain` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '空气质量指数级别描述',
+  `color` varchar(7) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '空气质量指数级别表示颜色',
+  `health_impact` varchar(500) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '对健康影响情况',
+  `take_steps` varchar(500) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '建议采取的措施',
+  `so2_min` int NOT NULL COMMENT '本级别二氧化硫浓度最小限值',
+  `so2_max` int NOT NULL COMMENT '本级别二氧化硫浓度最大限值',
+  `co_min` int NOT NULL COMMENT '本级别一氧化碳浓度最小限值',
+  `co_max` int NOT NULL COMMENT '本级别一氧化碳浓度最大限值',
+  `spm_min` int NOT NULL COMMENT '本级别悬浮颗粒物浓度最小限值',
+  `spm_max` int NOT NULL COMMENT '本级别悬浮颗粒物浓度最大限值',
+  `remarks` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`aqi_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `aqi`
---
-
-LOCK TABLES `aqi` WRITE;
-/*!40000 ALTER TABLE `aqi` DISABLE KEYS */;
-INSERT INTO `aqi` VALUES (1,'优','一级','#00E400','空气质量令人满意，基本无空气污染','各类人群可正常活动',0,50,0,2,0,35,NULL,NULL,'0000-00-00 00:00:00',0),(2,'良','二级','#FFFF00','空气质量可接受，但某些污染物可能对极少数异常敏感人群健康有较弱影响','极少数异常敏感人群应减少户外活动',51,150,3,4,36,75,NULL,NULL,'0000-00-00 00:00:00',0),(3,'轻度污染','三级','#FF7E00','易感人群症状有轻度加剧，健康人群出现刺激症状','儿童、老年人及心脏病、呼吸系统疾病患者应减少长时间、高强度的户外锻炼',151,475,5,14,76,115,NULL,NULL,'0000-00-00 00:00:00',0),(4,'中度污染','四级','#FF0000','进一步加剧易感人群症状，可能对健康人群心脏、呼吸系统有影响','儿童、老年人及心脏病、呼吸系统疾病患者应避免长时间、高强度的户外锻炼，一般人群适量减少户外活动',476,800,15,24,116,150,NULL,NULL,'0000-00-00 00:00:00',0),(5,'重度污染','五级','#8F3F97','心脏病和肺病患者症状显著加剧，运动耐受力降低，健康人群普遍出现症状','儿童、老年人和心脏病、肺病患者应停留在室内，停止户外活动，一般人群应减少户外活动',801,1600,25,36,151,250,NULL,NULL,'0000-00-00 00:00:00',0),(6,'严重污染','六级','#7E0023','健康人群运动耐受力降低，有明显强烈症状，提前出现某些疾病','儿童、老年人和病人应当留在室内，避免体力消耗，一般人群应避免户外活动',1601,2100,37,48,251,500,NULL,NULL,'0000-00-00 00:00:00',0),(7,'优','Excellent','#00e600',NULL,NULL,0,50,0,10,0,35,NULL,NULL,'2026-06-05 02:30:57',0),(8,'良','Good','#ffff00',NULL,NULL,51,100,11,20,36,75,NULL,NULL,'2026-06-05 02:30:57',0);
-/*!40000 ALTER TABLE `aqi` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `aqi_feedback`
---
-
+-- ----------------------------
+-- Table structure for aqi_feedback
+-- ----------------------------
 DROP TABLE IF EXISTS `aqi_feedback`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `aqi_feedback` (
-  `af_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '空气质量公众监督反馈信息编号',
-  `tel_id` varchar(20) DEFAULT NULL COMMENT '所属公众监督员编号（即手机号码）',
-  `province_id` int(11) DEFAULT NULL COMMENT '反馈信息所在省区域编号',
-  `city_id` int(11) DEFAULT NULL COMMENT '反馈信息所在市区域编号',
-  `address` varchar(200) DEFAULT NULL COMMENT '反馈信息所在区域详细地址',
-  `information` varchar(400) DEFAULT NULL COMMENT '反馈信息描述',
-  `estimated_grade` int(11) DEFAULT NULL COMMENT '反馈者对空气质量指数级别的预估等级',
-  `af_date` varchar(20) DEFAULT NULL COMMENT '反馈日期',
-  `af_time` varchar(20) DEFAULT NULL COMMENT '反馈时间',
-  `gm_id` int(11) DEFAULT '0' COMMENT '指派网格员编号',
-  `assign_date` varchar(20) DEFAULT NULL COMMENT '指派日期',
-  `assign_time` varchar(20) DEFAULT NULL COMMENT '指派时间',
-  `state` int(11) DEFAULT '0' COMMENT '信息状态：0=未指派，1=已指派，2=已确认',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`af_id`),
-  KEY `idx_tel_id` (`tel_id`),
-  KEY `idx_province_id` (`province_id`),
-  KEY `idx_city_id` (`city_id`),
-  KEY `idx_gm_id` (`gm_id`),
-  CONSTRAINT `aqi_feedback_ibfk_2` FOREIGN KEY (`gm_id`) REFERENCES `grid_member_old` (`gm_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='空气质量公众监督反馈表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `aqi_feedback`  (
+  `af_id` int NOT NULL AUTO_INCREMENT COMMENT '空气质量公众监督反馈信息编号',
+  `tel_id` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '所属公众监督员编号（即手机号码）',
+  `province_id` int NOT NULL COMMENT '反馈信息所在省区域编号',
+  `city_id` int NOT NULL COMMENT '反馈信息所在市区域编号',
+  `address` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息所在区域详细地址',
+  `information` varchar(400) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息描述',
+  `estimated_grade` int NOT NULL COMMENT '反馈者对空气质量指数级别的预估等级',
+  `af_date` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈日期',
+  `af_time` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈时间',
+  `gm_id` int NOT NULL DEFAULT 0 COMMENT '指派网格员编号',
+  `assign_date` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '指派日期',
+  `assign_time` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '指派时间',
+  `state` int NOT NULL COMMENT '信息状态: 0:未指派; 1:已指派; 2:已确认',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`af_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 46 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `aqi_feedback`
---
-
-LOCK TABLES `aqi_feedback` WRITE;
-/*!40000 ALTER TABLE `aqi_feedback` DISABLE KEYS */;
-/*!40000 ALTER TABLE `aqi_feedback` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `grid_city`
---
-
+-- ----------------------------
+-- Table structure for grid_city
+-- ----------------------------
 DROP TABLE IF EXISTS `grid_city`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `grid_city` (
-  `city_id` int(11) NOT NULL AUTO_INCREMENT,
-  `city_name` varchar(20) DEFAULT NULL COMMENT '系统网格覆盖市区域名称',
-  `province_id` int(11) DEFAULT NULL COMMENT '所属省区域编号',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`city_id`),
-  KEY `province_id` (`province_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COMMENT='系统网格覆盖市区域表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `grid_city`  (
+  `city_id` int NOT NULL AUTO_INCREMENT COMMENT '系统网格覆盖市区域编号',
+  `city_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统网格覆盖市区域名称',
+  `province_id` int NOT NULL COMMENT '所属省区域编号',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`city_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `grid_city`
---
-
-LOCK TABLES `grid_city` WRITE;
-/*!40000 ALTER TABLE `grid_city` DISABLE KEYS */;
-INSERT INTO `grid_city` VALUES (1,'北京市',1,NULL,NULL,'0000-00-00 00:00:00',0),(2,'上海市',2,NULL,NULL,'0000-00-00 00:00:00',0),(3,'重庆市',3,NULL,NULL,'0000-00-00 00:00:00',0),(4,'成都市',4,NULL,NULL,'0000-00-00 00:00:00',0),(5,'南岸区',1,NULL,'2026-06-05 10:30:57','2026-06-05 02:30:57',0),(6,'渝中区',1,NULL,'2026-06-05 10:30:57','2026-06-05 02:30:57',0);
-/*!40000 ALTER TABLE `grid_city` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `grid_member`
---
-
+-- ----------------------------
+-- Table structure for grid_member
+-- ----------------------------
 DROP TABLE IF EXISTS `grid_member`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `grid_member` (
-  `gm_id` varchar(11) NOT NULL,
-  `gm_name` varchar(20) DEFAULT NULL COMMENT '网格员名称',
-  `gm_code` varchar(20) DEFAULT NULL COMMENT '网格员登录编码',
-  `password` varchar(20) DEFAULT NULL COMMENT '登录密码',
-  `province_id` int(11) DEFAULT NULL COMMENT '网格区域：省编号',
-  `city_id` int(11) DEFAULT NULL COMMENT '网格区域：市编号',
-  `tel` varchar(20) DEFAULT NULL COMMENT '联系电话',
-  `state` int(11) DEFAULT '0' COMMENT '网格员状态 0:可工作 1:临时抽调 2:休假 3:其它',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`gm_id`),
-  KEY `province_id` (`province_id`),
-  KEY `city_id` (`city_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='空气质量监测网格员表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `grid_member`  (
+  `gm_id` int NOT NULL AUTO_INCREMENT COMMENT '网格员编号',
+  `gm_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '网格员名称',
+  `gm_code` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '网格员登录编码',
+  `password` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '格网员登录密码',
+  `province_id` int NOT NULL COMMENT '网格区域：省编号',
+  `city_id` int NOT NULL COMMENT '网格区域：市编号',
+  `tel` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '联系电话',
+  `state` int NOT NULL DEFAULT 0 COMMENT '网格员状态（0:工作状态; 1:非工作状态（由考勤系统管理）; 2:其它）',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`gm_id`) USING BTREE,
+  UNIQUE INDEX `gm_code`(`gm_code` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 35 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `grid_member`
---
-
-LOCK TABLES `grid_member` WRITE;
-/*!40000 ALTER TABLE `grid_member` DISABLE KEYS */;
-INSERT INTO `grid_member` VALUES ('13511112222','王小龙','GM001','grid111',1,1,'13511112222',0,'城东网格员','2025-12-10 11:00:00','2026-06-04 03:17:29',0),('13512345678','张三','G001','123456',1,1,'13512345678',1,'南岸网格员','2026-06-05 10:30:35','2026-06-05 02:30:35',0),('13512345679','李四','G002','123456',1,2,'13512345679',1,'渝中网格员','2026-06-05 10:30:35','2026-06-05 02:30:35',0),('13522223333','刘芳芳','GM002','grid222',1,2,'13522223333',0,'城西网格员','2025-12-10 11:08:00','2026-06-04 03:17:29',0);
-/*!40000 ALTER TABLE `grid_member` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `grid_province`
---
-
+-- ----------------------------
+-- Table structure for grid_province
+-- ----------------------------
 DROP TABLE IF EXISTS `grid_province`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `grid_province` (
-  `province_id` int(11) NOT NULL AUTO_INCREMENT,
-  `province_name` varchar(20) DEFAULT NULL COMMENT '系统网格覆盖省区域名称',
-  `province_abbr` varchar(2) DEFAULT NULL COMMENT '系统网格覆盖省区域简称',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`province_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COMMENT='系统网格覆盖省区域表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `grid_province`  (
+  `province_id` int NOT NULL AUTO_INCREMENT COMMENT '系统网格覆盖省区域编号',
+  `province_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统网格覆盖省区域名称',
+  `province_abbr` varchar(2) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统网格覆盖省区域简称',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`province_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `grid_province`
---
-
-LOCK TABLES `grid_province` WRITE;
-/*!40000 ALTER TABLE `grid_province` DISABLE KEYS */;
-INSERT INTO `grid_province` VALUES (1,'北京市','京',NULL,NULL,'0000-00-00 00:00:00',0),(2,'上海市','沪',NULL,NULL,'0000-00-00 00:00:00',0),(3,'重庆市','渝',NULL,NULL,'0000-00-00 00:00:00',0),(4,'四川省','川',NULL,NULL,'0000-00-00 00:00:00',0),(5,'重庆市','渝',NULL,'2026-06-05 10:30:57','2026-06-05 02:30:57',0);
-/*!40000 ALTER TABLE `grid_province` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `statistics`
---
-
+-- ----------------------------
+-- Table structure for statistics
+-- ----------------------------
 DROP TABLE IF EXISTS `statistics`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `statistics` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `gm_id` int(11) DEFAULT NULL,
-  `province_id` int(11) DEFAULT NULL COMMENT '所属省编号',
-  `city_id` int(11) DEFAULT NULL COMMENT '所属市编号',
-  `aqi_id` int(11) DEFAULT NULL COMMENT '所属AQI级别编号',
-  `so2_value` int(11) DEFAULT NULL COMMENT '实测二氧化硫浓度',
-  `co_value` int(11) DEFAULT NULL COMMENT '实测一氧化碳浓度',
-  `spm_value` int(11) DEFAULT NULL COMMENT '实测悬浮颗粒物浓度',
-  `confirm_date` varchar(20) DEFAULT NULL,
-  `confirm_time` varchar(20) DEFAULT NULL,
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  `address` varchar(200) DEFAULT NULL COMMENT '反馈信息所在区域详细地址',
-  `so2_level` int(11) DEFAULT NULL COMMENT '空气二氧化硫指数级别',
-  `co_level` int(11) DEFAULT NULL COMMENT '空气一氧化碳指数级别',
-  `spm_level` int(11) DEFAULT NULL COMMENT '空气PM2.5指数级别',
-  `fd_id` varchar(20) DEFAULT NULL COMMENT '反馈者编号（公众监督员电话号码）',
-  `information` varchar(400) DEFAULT NULL COMMENT '反馈信息描述',
-  PRIMARY KEY (`id`),
-  KEY `aqi_id` (`aqi_id`),
-  KEY `gm_id` (`gm_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='监测统计表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `statistics`  (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '统计信息编号',
+  `province_id` int NOT NULL COMMENT '所属省区域编号',
+  `city_id` int NOT NULL COMMENT '所属市区域编号',
+  `address` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息所在区域详细地址',
+  `so2_value` int NOT NULL COMMENT '空气二氧化硫浓度值（单位：μg/m3）',
+  `so2_level` int NOT NULL COMMENT '空气二氧化硫指数级别',
+  `co_value` int NOT NULL COMMENT '空气一氧化碳浓度值（单位：μg/m3）',
+  `co_level` int NOT NULL COMMENT '空气一氧化碳指数级别',
+  `spm_value` int NOT NULL COMMENT '空气悬浮颗粒物浓度值（单位：μg/m3）',
+  `spm_level` int NOT NULL COMMENT '空气PM2.5指数级别',
+  `aqi_id` int NOT NULL COMMENT '空气质量指数级别',
+  `confirm_date` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '确认日期',
+  `confirm_time` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '确认时间',
+  `gm_id` int NOT NULL COMMENT '所属网格员编号',
+  `fd_id` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈者编号（公众监督员电话号码）',
+  `information` varchar(400) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息描述',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 44 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `statistics`
---
-
-LOCK TABLES `statistics` WRITE;
-/*!40000 ALTER TABLE `statistics` DISABLE KEYS */;
-/*!40000 ALTER TABLE `statistics` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `supervisor`
---
-
+-- ----------------------------
+-- Table structure for supervisor
+-- ----------------------------
 DROP TABLE IF EXISTS `supervisor`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `supervisor` (
-  `tel_id` varchar(11) NOT NULL,
-  `password` varchar(20) DEFAULT NULL COMMENT '公众监督员登录密码',
-  `real_name` varchar(20) DEFAULT NULL COMMENT '公众监督员真实姓名',
-  `birthday` varchar(20) DEFAULT NULL COMMENT '公众监督员出生日期',
-  `sex` int(11) DEFAULT '1' COMMENT '公众监督员性别(1:男;0:女)',
-  `remarks` varchar(100) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`tel_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='公众监督员表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `supervisor`  (
+  `tel_id` varchar(11) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员编号（即手机号码）',
+  `password` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员登录密码',
+  `real_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员真实姓名',
+  `birthday` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员出生日期',
+  `sex` int NOT NULL DEFAULT 1 COMMENT '公众监督员性别（1：男；0：女）',
+  `remarks` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`tel_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `supervisor`
---
+-- ---------- 种子数据（与 aqstest 结构匹配）----------
+INSERT INTO `admins` (`admin_id`,`admin_code`,`password`,`remarks`) VALUES
+(1,'AD001','123456','系统管理员'),
+(2,'AD002','654321','管理员二');
 
-LOCK TABLES `supervisor` WRITE;
-/*!40000 ALTER TABLE `supervisor` DISABLE KEYS */;
-INSERT INTO `supervisor` VALUES ('13800138001','sup123','张建国','1985-03-12',1,'城区督查','2025-12-10 10:00:00','2026-06-04 03:17:22',0),('13900139002','sup456','李美玲','1988-07-25',2,'郊区督查','2025-12-10 10:05:00','2026-06-04 03:17:22',0);
-/*!40000 ALTER TABLE `supervisor` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+INSERT INTO `grid_province` (`province_id`,`province_name`,`province_abbr`,`remarks`) VALUES
+(1,'北京市','京',NULL),(2,'上海市','沪',NULL),(3,'辽宁省','辽',NULL),
+(4,'江苏省','苏',NULL),(5,'广东省','粤',NULL);
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+INSERT INTO `grid_city` (`city_id`,`city_name`,`province_id`,`remarks`) VALUES
+(1,'东城区',1,NULL),(2,'朝阳区',1,NULL),(3,'浦东新区',2,NULL),
+(4,'大连市',3,NULL),(5,'沈阳市',3,NULL),(6,'南京市',4,NULL),(7,'广州市',5,NULL);
 
--- Dump completed on 2026-06-05 11:26:56
+-- 网格员：state=0 为可工作（登录要求 state=0）
+INSERT INTO `grid_member` (`gm_id`,`gm_name`,`gm_code`,`password`,`province_id`,`city_id`,`tel`,`state`,`remarks`) VALUES
+(1,'张网格','GM001','grid111',1,1,'13511112222',0,NULL),
+(2,'李网格','GM002','grid222',1,2,'13522223333',0,NULL),
+(3,'王网格','GM003','grid333',2,3,'13533334444',0,NULL),
+(4,'赵网格','GM004','grid444',3,4,'13544445555',0,NULL),
+(5,'钱网格','GM005','grid555',4,6,'13555556666',0,NULL);
 
--- ========== 数据库 nep ==========
+INSERT INTO `aqi` (`aqi_id`,`chinese_explain`,`aqi_explain`,`color`,`health_impact`,`take_steps`,`so2_min`,`so2_max`,`co_min`,`co_max`,`spm_min`,`spm_max`,`remarks`) VALUES
+(1,'优','一级','绿色','空气质量令人满意，基本无空气污染','各类人群可正常活动',0,50,0,5,0,50,NULL),
+(2,'良','二级','黄色','空气质量可接受','极少数异常敏感人群应减少户外活动',50,150,5,10,50,150,NULL),
+(3,'轻度污染','三级','橙色','易感人群症状有轻度加剧','儿童老人及心脏病、呼吸系统疾病患者应减少长时间户外活动',150,475,10,35,150,250,NULL),
+(4,'中度污染','四级','红色','进一步加剧易感人群症状','减少户外运动',475,800,35,60,250,350,NULL),
+(5,'重度污染','五级','紫色','心脏病和肺病患者症状显著加剧','停止户外活动',800,1600,60,90,350,420,NULL),
+(6,'严重污染','六级','褐红色','健康人群运动耐受力降低','避免户外活动',1600,2100,90,120,420,500,NULL);
+
+-- 反馈：state 0未指派 / 1已指派 / 2已确认
+INSERT INTO `aqi_feedback` (`af_id`,`tel_id`,`province_id`,`city_id`,`address`,`information`,`estimated_grade`,`af_date`,`af_time`,`gm_id`,`assign_date`,`assign_time`,`state`,`remarks`) VALUES
+(1,'13800000001',1,1,'北京市东城区某街道','空气浑浊有异味',3,'2026-06-10','09:30:00',0,NULL,NULL,0,NULL),
+(2,'13800000002',1,2,'北京市朝阳区某路','雾霾严重能见度低',4,'2026-06-11','10:15:00',0,NULL,NULL,0,NULL),
+(3,'13800000003',2,3,'上海市浦东新区某小区','PM2.5偏高',4,'2026-06-12','08:40:00',0,NULL,NULL,0,NULL),
+(4,'13800000004',3,4,'辽宁省大连市某厂区','工厂排放刺鼻',5,'2026-06-13','07:50:00',4,'2026-06-13','09:00:00',1,NULL),
+(5,'13800000005',4,6,'江苏省南京市某街','焚烧秸秆烟雾大',5,'2026-06-09','16:20:00',5,'2026-06-09','17:00:00',2,NULL);
+
+INSERT INTO `statistics` (`id`,`province_id`,`city_id`,`address`,`so2_value`,`so2_level`,`co_value`,`co_level`,`spm_value`,`spm_level`,`aqi_id`,`confirm_date`,`confirm_time`,`gm_id`,`fd_id`,`information`,`remarks`) VALUES
+(1,1,1,'北京市东城区',30,1,3,1,40,1,1,'2026-06-10','12:00:00',1,'13800000001','空气优',NULL),
+(2,1,2,'北京市朝阳区',120,2,8,2,100,2,2,'2026-06-11','12:30:00',2,'13800000002','空气良',NULL),
+(3,2,3,'上海市浦东新区',300,3,20,3,200,3,3,'2026-06-12','11:00:00',3,'13800000003','轻度污染',NULL),
+(4,3,4,'辽宁省大连市',600,4,50,4,300,4,4,'2026-06-13','10:00:00',4,'13800000004','中度污染',NULL),
+(5,4,6,'江苏省南京市',1000,5,70,5,380,5,5,'2026-06-09','18:00:00',5,'13800000005','重度污染',NULL);
+
+INSERT INTO `supervisor` (`tel_id`,`password`,`real_name`,`birthday`,`sex`,`remarks`) VALUES
+('13800000001','123456','张三','1990-05-12',1,NULL),
+('13800000002','123456','李四','1992-08-20',0,NULL);
+
+-- ========================= 数据库 nep =========================
 CREATE DATABASE IF NOT EXISTS `nep` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE `nep`;
--- MySQL dump 10.13  Distrib 5.7.22, for Win64 (x86_64)
---
--- Host: localhost    Database: nepu_environment
--- ------------------------------------------------------
--- Server version	5.5.13
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
---
--- Table structure for table `admins`
---
-
+-- ----------------------------
+-- Table structure for admins
+-- ----------------------------
 DROP TABLE IF EXISTS `admins`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `admins` (
-  `admin_id` int(11) NOT NULL AUTO_INCREMENT,
-  `admin_code` varchar(20) DEFAULT NULL COMMENT '系统管理员登录编码',
-  `password` varchar(20) DEFAULT NULL COMMENT '系统管理员登录密码',
-  `remarks` varchar(100) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`admin_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COMMENT='系统管理员表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `admins`  (
+  `admin_id` int NOT NULL AUTO_INCREMENT COMMENT '系统管理员编号',
+  `admin_code` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统管理员登录编码',
+  `password` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统管理员登录密码',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`admin_id`) USING BTREE,
+  UNIQUE INDEX `dis_code`(`admin_code` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `admins`
---
-
-LOCK TABLES `admins` WRITE;
-/*!40000 ALTER TABLE `admins` DISABLE KEYS */;
-INSERT INTO `admins` VALUES (1,'AD001','123456','系统超级管理员','2025-12-10 09:00:00','2026-06-04 03:17:12',0),(2,'AD002','654321','后台运维管理员','2025-12-10 09:10:00','2026-06-04 03:17:12',0);
-/*!40000 ALTER TABLE `admins` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `aqi`
---
-
+-- ----------------------------
+-- Table structure for aqi
+-- ----------------------------
 DROP TABLE IF EXISTS `aqi`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `aqi` (
-  `aqi_id` int(11) NOT NULL AUTO_INCREMENT,
-  `chinese_explain` varchar(10) DEFAULT NULL COMMENT '空气质量指数级别汉字表述',
-  `aqi_explain` varchar(20) DEFAULT NULL COMMENT '空气质量指数级别描述',
-  `color` varchar(7) DEFAULT NULL COMMENT '空气质量指数级别表示颜色',
-  `health_impact` varchar(500) DEFAULT NULL COMMENT '对健康影响情况',
-  `take_steps` varchar(500) DEFAULT NULL COMMENT '建议采取的措施',
-  `so2_min` int(11) DEFAULT NULL COMMENT '本级别二氧化硫浓度最小限值',
-  `so2_max` int(11) DEFAULT NULL COMMENT '本级别二氧化硫浓度最大限值',
-  `co_min` int(11) DEFAULT NULL COMMENT '本级别一氧化碳浓度最小限值',
-  `co_max` int(11) DEFAULT NULL COMMENT '本级别一氧化碳浓度最大限值',
-  `spm_min` int(11) DEFAULT NULL COMMENT '本级别悬浮颗粒物浓度最小限值',
-  `spm_max` int(11) DEFAULT NULL COMMENT '本级别悬浮颗粒物浓度最大限值',
-  `remarks` varchar(100) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`aqi_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COMMENT='空气质量指数级别表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `aqi`  (
+  `aqi_id` int NOT NULL AUTO_INCREMENT COMMENT '空气质量指数级别(共六级)',
+  `chinese_explain` varchar(10) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '空气质量指数级别汉字表述',
+  `aqi_explain` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '空气质量指数级别描述',
+  `color` varchar(7) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '空气质量指数级别表示颜色',
+  `health_impact` varchar(500) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '对健康影响情况',
+  `take_steps` varchar(500) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '建议采取的措施',
+  `so2_min` int NOT NULL COMMENT '本级别二氧化硫浓度最小限值',
+  `so2_max` int NOT NULL COMMENT '本级别二氧化硫浓度最大限值',
+  `co_min` int NOT NULL COMMENT '本级别一氧化碳浓度最小限值',
+  `co_max` int NOT NULL COMMENT '本级别一氧化碳浓度最大限值',
+  `spm_min` int NOT NULL COMMENT '本级别悬浮颗粒物浓度最小限值',
+  `spm_max` int NOT NULL COMMENT '本级别悬浮颗粒物浓度最大限值',
+  `remarks` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`aqi_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `aqi`
---
-
-LOCK TABLES `aqi` WRITE;
-/*!40000 ALTER TABLE `aqi` DISABLE KEYS */;
-INSERT INTO `aqi` VALUES (1,'优','一级','#00E400','空气质量令人满意，基本无空气污染','各类人群可正常活动',0,50,0,2,0,35,NULL,NULL,'0000-00-00 00:00:00',0),(2,'良','二级','#FFFF00','空气质量可接受，但某些污染物可能对极少数异常敏感人群健康有较弱影响','极少数异常敏感人群应减少户外活动',51,150,3,4,36,75,NULL,NULL,'0000-00-00 00:00:00',0),(3,'轻度污染','三级','#FF7E00','易感人群症状有轻度加剧，健康人群出现刺激症状','儿童、老年人及心脏病、呼吸系统疾病患者应减少长时间、高强度的户外锻炼',151,475,5,14,76,115,NULL,NULL,'0000-00-00 00:00:00',0),(4,'中度污染','四级','#FF0000','进一步加剧易感人群症状，可能对健康人群心脏、呼吸系统有影响','儿童、老年人及心脏病、呼吸系统疾病患者应避免长时间、高强度的户外锻炼，一般人群适量减少户外活动',476,800,15,24,116,150,NULL,NULL,'0000-00-00 00:00:00',0),(5,'重度污染','五级','#8F3F97','心脏病和肺病患者症状显著加剧，运动耐受力降低，健康人群普遍出现症状','儿童、老年人和心脏病、肺病患者应停留在室内，停止户外活动，一般人群应减少户外活动',801,1600,25,36,151,250,NULL,NULL,'0000-00-00 00:00:00',0),(6,'严重污染','六级','#7E0023','健康人群运动耐受力降低，有明显强烈症状，提前出现某些疾病','儿童、老年人和病人应当留在室内，避免体力消耗，一般人群应避免户外活动',1601,2100,37,48,251,500,NULL,NULL,'0000-00-00 00:00:00',0),(7,'优','Excellent','#00e600',NULL,NULL,0,50,0,10,0,35,NULL,NULL,'2026-06-05 02:30:57',0),(8,'良','Good','#ffff00',NULL,NULL,51,100,11,20,36,75,NULL,NULL,'2026-06-05 02:30:57',0);
-/*!40000 ALTER TABLE `aqi` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `aqi_feedback`
---
-
+-- ----------------------------
+-- Table structure for aqi_feedback
+-- ----------------------------
 DROP TABLE IF EXISTS `aqi_feedback`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `aqi_feedback` (
-  `af_id` int(11) NOT NULL AUTO_INCREMENT COMMENT '空气质量公众监督反馈信息编号',
-  `tel_id` varchar(20) DEFAULT NULL COMMENT '所属公众监督员编号（即手机号码）',
-  `province_id` int(11) DEFAULT NULL COMMENT '反馈信息所在省区域编号',
-  `city_id` int(11) DEFAULT NULL COMMENT '反馈信息所在市区域编号',
-  `address` varchar(200) DEFAULT NULL COMMENT '反馈信息所在区域详细地址',
-  `information` varchar(400) DEFAULT NULL COMMENT '反馈信息描述',
-  `estimated_grade` int(11) DEFAULT NULL COMMENT '反馈者对空气质量指数级别的预估等级',
-  `af_date` varchar(20) DEFAULT NULL COMMENT '反馈日期',
-  `af_time` varchar(20) DEFAULT NULL COMMENT '反馈时间',
-  `gm_id` int(11) DEFAULT '0' COMMENT '指派网格员编号',
-  `assign_date` varchar(20) DEFAULT NULL COMMENT '指派日期',
-  `assign_time` varchar(20) DEFAULT NULL COMMENT '指派时间',
-  `state` int(11) DEFAULT '0' COMMENT '信息状态：0=未指派，1=已指派，2=已确认',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`af_id`),
-  KEY `idx_tel_id` (`tel_id`),
-  KEY `idx_province_id` (`province_id`),
-  KEY `idx_city_id` (`city_id`),
-  KEY `idx_gm_id` (`gm_id`),
-  CONSTRAINT `aqi_feedback_ibfk_2` FOREIGN KEY (`gm_id`) REFERENCES `grid_member_old` (`gm_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='空气质量公众监督反馈表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `aqi_feedback`  (
+  `af_id` int NOT NULL AUTO_INCREMENT COMMENT '空气质量公众监督反馈信息编号',
+  `tel_id` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '所属公众监督员编号（即手机号码）',
+  `province_id` int NOT NULL COMMENT '反馈信息所在省区域编号',
+  `city_id` int NOT NULL COMMENT '反馈信息所在市区域编号',
+  `address` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息所在区域详细地址',
+  `information` varchar(400) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息描述',
+  `estimated_grade` int NOT NULL COMMENT '反馈者对空气质量指数级别的预估等级',
+  `af_date` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈日期',
+  `af_time` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈时间',
+  `gm_id` int NOT NULL DEFAULT 0 COMMENT '指派网格员编号',
+  `assign_date` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '指派日期',
+  `assign_time` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '指派时间',
+  `state` int NOT NULL COMMENT '信息状态: 0:未指派; 1:已指派; 2:已确认',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`af_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 46 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `aqi_feedback`
---
-
-LOCK TABLES `aqi_feedback` WRITE;
-/*!40000 ALTER TABLE `aqi_feedback` DISABLE KEYS */;
-/*!40000 ALTER TABLE `aqi_feedback` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `grid_city`
---
-
+-- ----------------------------
+-- Table structure for grid_city
+-- ----------------------------
 DROP TABLE IF EXISTS `grid_city`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `grid_city` (
-  `city_id` int(11) NOT NULL AUTO_INCREMENT,
-  `city_name` varchar(20) DEFAULT NULL COMMENT '系统网格覆盖市区域名称',
-  `province_id` int(11) DEFAULT NULL COMMENT '所属省区域编号',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`city_id`),
-  KEY `province_id` (`province_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COMMENT='系统网格覆盖市区域表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `grid_city`  (
+  `city_id` int NOT NULL AUTO_INCREMENT COMMENT '系统网格覆盖市区域编号',
+  `city_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统网格覆盖市区域名称',
+  `province_id` int NOT NULL COMMENT '所属省区域编号',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`city_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `grid_city`
---
-
-LOCK TABLES `grid_city` WRITE;
-/*!40000 ALTER TABLE `grid_city` DISABLE KEYS */;
-INSERT INTO `grid_city` VALUES (1,'北京市',1,NULL,NULL,'0000-00-00 00:00:00',0),(2,'上海市',2,NULL,NULL,'0000-00-00 00:00:00',0),(3,'重庆市',3,NULL,NULL,'0000-00-00 00:00:00',0),(4,'成都市',4,NULL,NULL,'0000-00-00 00:00:00',0),(5,'南岸区',1,NULL,'2026-06-05 10:30:57','2026-06-05 02:30:57',0),(6,'渝中区',1,NULL,'2026-06-05 10:30:57','2026-06-05 02:30:57',0);
-/*!40000 ALTER TABLE `grid_city` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `grid_member`
---
-
+-- ----------------------------
+-- Table structure for grid_member
+-- ----------------------------
 DROP TABLE IF EXISTS `grid_member`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `grid_member` (
-  `gm_id` varchar(11) NOT NULL,
-  `gm_name` varchar(20) DEFAULT NULL COMMENT '网格员名称',
-  `gm_code` varchar(20) DEFAULT NULL COMMENT '网格员登录编码',
-  `password` varchar(20) DEFAULT NULL COMMENT '登录密码',
-  `province_id` int(11) DEFAULT NULL COMMENT '网格区域：省编号',
-  `city_id` int(11) DEFAULT NULL COMMENT '网格区域：市编号',
-  `tel` varchar(20) DEFAULT NULL COMMENT '联系电话',
-  `state` int(11) DEFAULT '0' COMMENT '网格员状态 0:可工作 1:临时抽调 2:休假 3:其它',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`gm_id`),
-  KEY `province_id` (`province_id`),
-  KEY `city_id` (`city_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='空气质量监测网格员表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `grid_member`  (
+  `gm_id` int NOT NULL AUTO_INCREMENT COMMENT '网格员编号',
+  `gm_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '网格员名称',
+  `gm_code` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '网格员登录编码',
+  `password` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '格网员登录密码',
+  `province_id` int NOT NULL COMMENT '网格区域：省编号',
+  `city_id` int NOT NULL COMMENT '网格区域：市编号',
+  `tel` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '联系电话',
+  `state` int NOT NULL DEFAULT 0 COMMENT '网格员状态（0:工作状态; 1:非工作状态（由考勤系统管理）; 2:其它）',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`gm_id`) USING BTREE,
+  UNIQUE INDEX `gm_code`(`gm_code` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 35 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `grid_member`
---
-
-LOCK TABLES `grid_member` WRITE;
-/*!40000 ALTER TABLE `grid_member` DISABLE KEYS */;
-INSERT INTO `grid_member` VALUES ('13511112222','王小龙','GM001','grid111',1,1,'13511112222',0,'城东网格员','2025-12-10 11:00:00','2026-06-04 03:17:29',0),('13512345678','张三','G001','123456',1,1,'13512345678',1,'南岸网格员','2026-06-05 10:30:35','2026-06-05 02:30:35',0),('13512345679','李四','G002','123456',1,2,'13512345679',1,'渝中网格员','2026-06-05 10:30:35','2026-06-05 02:30:35',0),('13522223333','刘芳芳','GM002','grid222',1,2,'13522223333',0,'城西网格员','2025-12-10 11:08:00','2026-06-04 03:17:29',0);
-/*!40000 ALTER TABLE `grid_member` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `grid_province`
---
-
+-- ----------------------------
+-- Table structure for grid_province
+-- ----------------------------
 DROP TABLE IF EXISTS `grid_province`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `grid_province` (
-  `province_id` int(11) NOT NULL AUTO_INCREMENT,
-  `province_name` varchar(20) DEFAULT NULL COMMENT '系统网格覆盖省区域名称',
-  `province_abbr` varchar(2) DEFAULT NULL COMMENT '系统网格覆盖省区域简称',
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`province_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COMMENT='系统网格覆盖省区域表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `grid_province`  (
+  `province_id` int NOT NULL AUTO_INCREMENT COMMENT '系统网格覆盖省区域编号',
+  `province_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统网格覆盖省区域名称',
+  `province_abbr` varchar(2) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '系统网格覆盖省区域简称',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`province_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `grid_province`
---
-
-LOCK TABLES `grid_province` WRITE;
-/*!40000 ALTER TABLE `grid_province` DISABLE KEYS */;
-INSERT INTO `grid_province` VALUES (1,'北京市','京',NULL,NULL,'0000-00-00 00:00:00',0),(2,'上海市','沪',NULL,NULL,'0000-00-00 00:00:00',0),(3,'重庆市','渝',NULL,NULL,'0000-00-00 00:00:00',0),(4,'四川省','川',NULL,NULL,'0000-00-00 00:00:00',0),(5,'重庆市','渝',NULL,'2026-06-05 10:30:57','2026-06-05 02:30:57',0);
-/*!40000 ALTER TABLE `grid_province` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `statistics`
---
-
+-- ----------------------------
+-- Table structure for statistics
+-- ----------------------------
 DROP TABLE IF EXISTS `statistics`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `statistics` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `gm_id` int(11) DEFAULT NULL,
-  `province_id` int(11) DEFAULT NULL COMMENT '所属省编号',
-  `city_id` int(11) DEFAULT NULL COMMENT '所属市编号',
-  `aqi_id` int(11) DEFAULT NULL COMMENT '所属AQI级别编号',
-  `so2_value` int(11) DEFAULT NULL COMMENT '实测二氧化硫浓度',
-  `co_value` int(11) DEFAULT NULL COMMENT '实测一氧化碳浓度',
-  `spm_value` int(11) DEFAULT NULL COMMENT '实测悬浮颗粒物浓度',
-  `confirm_date` varchar(20) DEFAULT NULL,
-  `confirm_time` varchar(20) DEFAULT NULL,
-  `remarks` varchar(200) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  `address` varchar(200) DEFAULT NULL COMMENT '反馈信息所在区域详细地址',
-  `so2_level` int(11) DEFAULT NULL COMMENT '空气二氧化硫指数级别',
-  `co_level` int(11) DEFAULT NULL COMMENT '空气一氧化碳指数级别',
-  `spm_level` int(11) DEFAULT NULL COMMENT '空气PM2.5指数级别',
-  `fd_id` varchar(20) DEFAULT NULL COMMENT '反馈者编号（公众监督员电话号码）',
-  `information` varchar(400) DEFAULT NULL COMMENT '反馈信息描述',
-  PRIMARY KEY (`id`),
-  KEY `aqi_id` (`aqi_id`),
-  KEY `gm_id` (`gm_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='监测统计表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `statistics`  (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '统计信息编号',
+  `province_id` int NOT NULL COMMENT '所属省区域编号',
+  `city_id` int NOT NULL COMMENT '所属市区域编号',
+  `address` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息所在区域详细地址',
+  `so2_value` int NOT NULL COMMENT '空气二氧化硫浓度值（单位：μg/m3）',
+  `so2_level` int NOT NULL COMMENT '空气二氧化硫指数级别',
+  `co_value` int NOT NULL COMMENT '空气一氧化碳浓度值（单位：μg/m3）',
+  `co_level` int NOT NULL COMMENT '空气一氧化碳指数级别',
+  `spm_value` int NOT NULL COMMENT '空气悬浮颗粒物浓度值（单位：μg/m3）',
+  `spm_level` int NOT NULL COMMENT '空气PM2.5指数级别',
+  `aqi_id` int NOT NULL COMMENT '空气质量指数级别',
+  `confirm_date` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '确认日期',
+  `confirm_time` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '确认时间',
+  `gm_id` int NOT NULL COMMENT '所属网格员编号',
+  `fd_id` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈者编号（公众监督员电话号码）',
+  `information` varchar(400) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '反馈信息描述',
+  `remarks` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 44 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `statistics`
---
-
-LOCK TABLES `statistics` WRITE;
-/*!40000 ALTER TABLE `statistics` DISABLE KEYS */;
-/*!40000 ALTER TABLE `statistics` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `supervisor`
---
-
+-- ----------------------------
+-- Table structure for supervisor
+-- ----------------------------
 DROP TABLE IF EXISTS `supervisor`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `supervisor` (
-  `tel_id` varchar(11) NOT NULL,
-  `password` varchar(20) DEFAULT NULL COMMENT '公众监督员登录密码',
-  `real_name` varchar(20) DEFAULT NULL COMMENT '公众监督员真实姓名',
-  `birthday` varchar(20) DEFAULT NULL COMMENT '公众监督员出生日期',
-  `sex` int(11) DEFAULT '1' COMMENT '公众监督员性别(1:男;0:女)',
-  `remarks` varchar(100) DEFAULT NULL COMMENT '备注',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  `is_deleted` tinyint(4) DEFAULT '0' COMMENT '逻辑删除',
-  PRIMARY KEY (`tel_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='公众监督员表';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `supervisor`  (
+  `tel_id` varchar(11) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员编号（即手机号码）',
+  `password` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员登录密码',
+  `real_name` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员真实姓名',
+  `birthday` varchar(20) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT '公众监督员出生日期',
+  `sex` int NOT NULL DEFAULT 1 COMMENT '公众监督员性别（1：男；0：女）',
+  `remarks` varchar(100) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`tel_id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
---
--- Dumping data for table `supervisor`
---
+-- ---------- 种子数据（与 aqstest 结构匹配）----------
+INSERT INTO `admins` (`admin_id`,`admin_code`,`password`,`remarks`) VALUES
+(1,'AD001','123456','系统管理员'),
+(2,'AD002','654321','管理员二');
 
-LOCK TABLES `supervisor` WRITE;
-/*!40000 ALTER TABLE `supervisor` DISABLE KEYS */;
-INSERT INTO `supervisor` VALUES ('13800138001','sup123','张建国','1985-03-12',1,'城区督查','2025-12-10 10:00:00','2026-06-04 03:17:22',0),('13900139002','sup456','李美玲','1988-07-25',2,'郊区督查','2025-12-10 10:05:00','2026-06-04 03:17:22',0);
-/*!40000 ALTER TABLE `supervisor` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+INSERT INTO `grid_province` (`province_id`,`province_name`,`province_abbr`,`remarks`) VALUES
+(1,'北京市','京',NULL),(2,'上海市','沪',NULL),(3,'辽宁省','辽',NULL),
+(4,'江苏省','苏',NULL),(5,'广东省','粤',NULL);
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+INSERT INTO `grid_city` (`city_id`,`city_name`,`province_id`,`remarks`) VALUES
+(1,'东城区',1,NULL),(2,'朝阳区',1,NULL),(3,'浦东新区',2,NULL),
+(4,'大连市',3,NULL),(5,'沈阳市',3,NULL),(6,'南京市',4,NULL),(7,'广州市',5,NULL);
 
--- Dump completed on 2026-06-05 11:26:56
+-- 网格员：state=0 为可工作（登录要求 state=0）
+INSERT INTO `grid_member` (`gm_id`,`gm_name`,`gm_code`,`password`,`province_id`,`city_id`,`tel`,`state`,`remarks`) VALUES
+(1,'张网格','GM001','grid111',1,1,'13511112222',0,NULL),
+(2,'李网格','GM002','grid222',1,2,'13522223333',0,NULL),
+(3,'王网格','GM003','grid333',2,3,'13533334444',0,NULL),
+(4,'赵网格','GM004','grid444',3,4,'13544445555',0,NULL),
+(5,'钱网格','GM005','grid555',4,6,'13555556666',0,NULL);
+
+INSERT INTO `aqi` (`aqi_id`,`chinese_explain`,`aqi_explain`,`color`,`health_impact`,`take_steps`,`so2_min`,`so2_max`,`co_min`,`co_max`,`spm_min`,`spm_max`,`remarks`) VALUES
+(1,'优','一级','绿色','空气质量令人满意，基本无空气污染','各类人群可正常活动',0,50,0,5,0,50,NULL),
+(2,'良','二级','黄色','空气质量可接受','极少数异常敏感人群应减少户外活动',50,150,5,10,50,150,NULL),
+(3,'轻度污染','三级','橙色','易感人群症状有轻度加剧','儿童老人及心脏病、呼吸系统疾病患者应减少长时间户外活动',150,475,10,35,150,250,NULL),
+(4,'中度污染','四级','红色','进一步加剧易感人群症状','减少户外运动',475,800,35,60,250,350,NULL),
+(5,'重度污染','五级','紫色','心脏病和肺病患者症状显著加剧','停止户外活动',800,1600,60,90,350,420,NULL),
+(6,'严重污染','六级','褐红色','健康人群运动耐受力降低','避免户外活动',1600,2100,90,120,420,500,NULL);
+
+-- 反馈：state 0未指派 / 1已指派 / 2已确认
+INSERT INTO `aqi_feedback` (`af_id`,`tel_id`,`province_id`,`city_id`,`address`,`information`,`estimated_grade`,`af_date`,`af_time`,`gm_id`,`assign_date`,`assign_time`,`state`,`remarks`) VALUES
+(1,'13800000001',1,1,'北京市东城区某街道','空气浑浊有异味',3,'2026-06-10','09:30:00',0,NULL,NULL,0,NULL),
+(2,'13800000002',1,2,'北京市朝阳区某路','雾霾严重能见度低',4,'2026-06-11','10:15:00',0,NULL,NULL,0,NULL),
+(3,'13800000003',2,3,'上海市浦东新区某小区','PM2.5偏高',4,'2026-06-12','08:40:00',0,NULL,NULL,0,NULL),
+(4,'13800000004',3,4,'辽宁省大连市某厂区','工厂排放刺鼻',5,'2026-06-13','07:50:00',4,'2026-06-13','09:00:00',1,NULL),
+(5,'13800000005',4,6,'江苏省南京市某街','焚烧秸秆烟雾大',5,'2026-06-09','16:20:00',5,'2026-06-09','17:00:00',2,NULL);
+
+INSERT INTO `statistics` (`id`,`province_id`,`city_id`,`address`,`so2_value`,`so2_level`,`co_value`,`co_level`,`spm_value`,`spm_level`,`aqi_id`,`confirm_date`,`confirm_time`,`gm_id`,`fd_id`,`information`,`remarks`) VALUES
+(1,1,1,'北京市东城区',30,1,3,1,40,1,1,'2026-06-10','12:00:00',1,'13800000001','空气优',NULL),
+(2,1,2,'北京市朝阳区',120,2,8,2,100,2,2,'2026-06-11','12:30:00',2,'13800000002','空气良',NULL),
+(3,2,3,'上海市浦东新区',300,3,20,3,200,3,3,'2026-06-12','11:00:00',3,'13800000003','轻度污染',NULL),
+(4,3,4,'辽宁省大连市',600,4,50,4,300,4,4,'2026-06-13','10:00:00',4,'13800000004','中度污染',NULL),
+(5,4,6,'江苏省南京市',1000,5,70,5,380,5,5,'2026-06-09','18:00:00',5,'13800000005','重度污染',NULL);
+
+INSERT INTO `supervisor` (`tel_id`,`password`,`real_name`,`birthday`,`sex`,`remarks`) VALUES
+('13800000001','123456','张三','1990-05-12',1,NULL),
+('13800000002','123456','李四','1992-08-20',0,NULL);
 
 SET FOREIGN_KEY_CHECKS=1;
--- 运行方式：
---   Docker:  docker exec -i mysql mysql -uroot -proot < db/init-all.sql
---   本地CLI: mysql -uroot -p < db/init-all.sql
