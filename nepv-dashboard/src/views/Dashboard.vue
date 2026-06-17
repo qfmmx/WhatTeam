@@ -15,93 +15,121 @@
       <!-- 左侧数据区 -->
       <aside class="side-panel left-panel">
         <div class="material-card chart-container gauge-container">
-          <div class="chart-title-text text-center">网格覆盖率监控</div>
-          <div class="coverage-content">
-            <div class="coverage-item">
-              <CoverageChart title="省会城市" :percentageStr="provinceCoverage" />
+          <dv-border-box-13 backgroundColor="#0a1631">
+            <div class="inner-flex-container">
+              <div class="chart-title-text text-center">网格覆盖率监控</div>
+              <div class="coverage-content">
+                <div class="coverage-item">
+                  <CoverageChart title="省会城市" :percentageStr="provinceCoverage" />
+                </div>
+                <div class="coverage-item">
+                  <CoverageChart title="大城市" :percentageStr="cityCoverage" />
+                </div>
+              </div>
             </div>
-            <div class="coverage-item">
-              <CoverageChart title="大城市" :percentageStr="cityCoverage" />
-            </div>
-          </div>
+          </dv-border-box-13>
         </div>
         
         <div class="material-card chart-container pie-container">
-          <div class="chart-title-text text-center">空气质量指数级别分布</div>
-          <div class="chart-wrapper">
-             <AqiDistributeChart :data="aqiDistributeData" />
-          </div>
+          <dv-border-box-13 backgroundColor="#0a1631">
+            <div class="inner-flex-container">
+              <div class="chart-title-text text-center">空气质量指数级别分布</div>
+              <div class="chart-wrapper">
+                 <AqiDistributeChart :data="aqiDistributeData" />
+              </div>
+            </div>
+          </dv-border-box-13>
         </div>
         
         <div class="material-card chart-container trend-container">
-          <div class="chart-title-text text-center">12个月内全国空气质量超标趋势</div>
-          <div class="chart-wrapper">
-             <TrendChart :data="aqiTrendData" />
-          </div>
+          <dv-border-box-13 backgroundColor="#0a1631">
+            <div class="inner-flex-container">
+              <div class="chart-title-text text-center">12个月内全国空气质量超标趋势</div>
+              <div class="chart-wrapper">
+                 <TrendChart :data="aqiTrendData" />
+              </div>
+            </div>
+          </dv-border-box-13>
         </div>
       </aside>
 
       <!-- 中间地图与核心数据区 -->
       <section class="center-panel">
         <div class="material-card map-container">
-          <div class="map-wrapper">
-              <ChinaMap :data="provinceTotalData" :pm25Data="pm25Data" :so2Data="so2Data" :coData="coData" />
-          </div>
-          <!-- 核心数据汇总 -->
-          <div class="summary-data">
-            <div class="summary-title">空气质量检测实时统计</div>
-            <div class="data-items-row">
-              <div class="data-item">
-                <div class="icon-wrap" style="background: rgba(138, 180, 248, 0.15);">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#8ab4f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path></svg>
-                </div>
-                <div class="data-info">
-                  <span class="data-value primary">{{ totalAqiCount }}</span>
-                  <span class="data-label">检测总数量</span>
-                </div>
+          <dv-border-box-10 backgroundColor="#0a1631">
+            <div class="inner-flex-container">
+              <div class="map-wrapper">
+                  <ChinaMap :data="provinceTotalData" :pm25Data="pm25Data" :so2Data="so2Data" :coData="coData" />
               </div>
-              <div class="data-item">
-                <div class="icon-wrap" style="background: rgba(129, 201, 149, 0.15);">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#81c995" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg>
-                </div>
-                <div class="data-info">
-                  <span class="data-value success">{{ goodAqiCount }}</span>
-                  <span class="data-label">良好数量</span>
-                </div>
-              </div>
-              <div class="data-item">
-                <div class="icon-wrap" style="background: rgba(242, 139, 130, 0.15);">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#f28b82" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                </div>
-                <div class="data-info">
-                  <span class="data-value danger">{{ totalAqiCount - goodAqiCount }}</span>
-                  <span class="data-label">污染数量</span>
+              <!-- 核心数据汇总 -->
+              <div class="summary-data">
+                <div class="summary-title">空气质量检测实时统计</div>
+                <div class="data-items-row">
+                  <div class="data-item">
+                    <div class="icon-wrap" style="background: rgba(138, 180, 248, 0.15);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#8ab4f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"></circle><path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path></svg>
+                    </div>
+                    <div class="data-info">
+                      <span class="data-value primary">{{ totalAqiCount }}</span>
+                      <span class="data-label">检测总数量</span>
+                    </div>
+                  </div>
+                  <div class="data-item">
+                    <div class="icon-wrap" style="background: rgba(129, 201, 149, 0.15);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#81c995" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path></svg>
+                    </div>
+                    <div class="data-info">
+                      <span class="data-value success">{{ goodAqiCount }}</span>
+                      <span class="data-label">良好数量</span>
+                    </div>
+                  </div>
+                  <div class="data-item">
+                    <div class="icon-wrap" style="background: rgba(242, 139, 130, 0.15);">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="#f28b82" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    </div>
+                    <div class="data-info">
+                      <span class="data-value danger">{{ totalAqiCount - goodAqiCount }}</span>
+                      <span class="data-label">污染数量</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </dv-border-box-10>
         </div>
       </section>
 
       <!-- 右侧数据区 -->
       <aside class="side-panel right-panel">
         <div class="material-card chart-container">
-          <div class="chart-title-text text-center">悬浮颗粒物 (PM2.5) 浓度超标累计</div>
-          <div class="chart-wrapper">
-             <VerticalBarChart :data="pm25Data" color="#8ab4f8" />
-          </div>
+          <dv-border-box-13 backgroundColor="#0a1631">
+            <div class="inner-flex-container">
+              <div class="chart-title-text text-center">悬浮颗粒物 (PM2.5) 浓度超标累计</div>
+              <div class="chart-wrapper">
+                 <VerticalBarChart :data="pm25Data" color="#8ab4f8" />
+              </div>
+            </div>
+          </dv-border-box-13>
         </div>
         <div class="material-card chart-container">
-          <div class="chart-title-text text-center">二氧化硫 (SO2) 浓度超标累计</div>
-          <div class="chart-wrapper">
-             <VerticalBarChart :data="so2Data" color="#81c995" />
-          </div>
+          <dv-border-box-13 backgroundColor="#0a1631">
+            <div class="inner-flex-container">
+              <div class="chart-title-text text-center">二氧化硫 (SO2) 浓度超标累计</div>
+              <div class="chart-wrapper">
+                 <VerticalBarChart :data="so2Data" color="#81c995" />
+              </div>
+            </div>
+          </dv-border-box-13>
         </div>
         <div class="material-card chart-container">
-          <div class="chart-title-text text-center">一氧化碳 (CO) 浓度超标累计</div>
-          <div class="chart-wrapper">
-             <VerticalBarChart :data="coData" color="#f28b82" />
-          </div>
+          <dv-border-box-13 backgroundColor="#0a1631">
+            <div class="inner-flex-container">
+              <div class="chart-title-text text-center">一氧化碳 (CO) 浓度超标累计</div>
+              <div class="chart-wrapper">
+                 <VerticalBarChart :data="coData" color="#f28b82" />
+              </div>
+            </div>
+          </dv-border-box-13>
         </div>
       </aside>
     </main>
@@ -142,8 +170,8 @@ const fetchDashboardData = async () => {
     provinceCoverage.value = parseFloat(data.provinceCoverage || '47') + ''
     cityCoverage.value = parseFloat(data.cityCoverage || '16') + ''
     
-    totalAqiCount.value = data.totalAqiCount || 38
-    goodAqiCount.value = data.goodAqiCount || 2
+    totalAqiCount.value = data.totalAqiCount ?? 38
+    goodAqiCount.value = data.goodAqiCount ?? 2
 
     aqiDistributeData.value = data.aqiDistributeData || []
     aqiTrendData.value = data.aqiTrendData || []
@@ -262,16 +290,18 @@ onUnmounted(() => {
 }
 
 .material-card {
-  background: #0a1631; 
+  background: transparent; 
   border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: box-shadow 0.2s ease-in-out;
 }
-.material-card:hover {
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+
+.inner-flex-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
 }
 
 /* 图表容器 */
@@ -357,7 +387,7 @@ onUnmounted(() => {
   justify-content: center;
   padding: 0 20px;
   flex-shrink: 0;
-  background: #0a1631; /* 匹配卡片背景 */
+  background: transparent; 
 }
 
 .summary-title {
